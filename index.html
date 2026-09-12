@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cross-Device Sync App</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      padding: 20px;
+      max-width: 480px;
+      margin: 0 auto;
+      background: #f7f9fc;
+    }
+    .card {
+      background: #ffffff;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+    input[type="text"] {
+      width: 100%;
+      padding: 12px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      box-sizing: border-box;
+      margin-bottom: 10px;
+    }
+    button {
+      width: 100%;
+      padding: 12px;
+      font-size: 16px;
+      background: #007aff;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    button:active { background: #0056b3; }
+    ul { list-style: none; padding: 0; margin-top: 20px; }
+    li {
+      background: #edf2f7;
+      margin-bottom: 8px;
+      padding: 12px;
+      border-radius: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .delete-btn {
+      background: #ff3b30;
+      color: white;
+      border: none;
+      padding: 4px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      width: auto;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <h2>Realtime Sync Notes</h2>
+    <input type="text" id="noteInput" placeholder="Type something..." />
+    <button id="addBtn">Add Item</button>
+
+    <ul id="notesList"></ul>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { 
+      getFirestore, 
+      enableMultiTabIndexedDbPersistence,
+      collection, 
+      addDoc, 
+      deleteDoc,
+      doc,
+      onSnapshot, 
+      query, 
+      orderBy 
+    } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    // 1. YOUR FIREBASE CONFIGURATION (Paste your keys here)
+    const firebaseConfig = {
+      apiKey: "AIzaSyBGlQnlb1SnHgj4s7-TdlfuKs-WFVW5unw",
+      authDomain: "trading-sync-app.firebaseapp.com",
+      projectId: "trading-sync-app",
+      storageBucket: "trading-sync-app.firebasestorage.app",
+      messagingSenderId: "1049446730288",
+      appId: "1:1049446730288:web:416306177bc056ca127bf5"
+    };
+
+    // 2. Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // 3. Enable Offline Local Storage Sync
+    enableMultiTabIndexedDbPersistence(db).catch((err) => {
+      if (err.code === 'failed-precondition') {
+        console.warn('Persistence failed: Multiple tabs open');
+      } else if (err.code === 'unimplemented') {
+        console.warn('Browser does not support persistence');
+      }
+    });
+
+    const notesRef = collection(db, "notes");
+
+    // 4. Real-time Synchronization Listener
+    const q = query(notesRef, orderBy("createdAt", "desc"));
+    onSnapshot(q, (snapshot) => {
+      const list = document.getElementById("notesList");
+      list.innerHTML = "";
+      
+      snapshot.forEach((docSnapshot) => {
+        const data = docSnapshot.data();
+        const li = document.createElement("li");
+        li.textContent = data.text;
+
+        const delBtn = document.createElement("button");
+        delBtn.textContent = "Delete";
+        delBtn.className = "delete-btn";
+        delBtn.onclick = () => deleteDoc(doc(db, "notes", docSnapshot.id));
+
+        li.appendChild(delBtn);
+        list.appendChild(li);
+      });
+    });
+
+    // 5. Add New Item
+    async function addItem() {
+      const input = document.getElementById("noteInput");
+      const text = input.value.trim();
+      if (!text) return;
+
+      await addDoc(notesRef, {
+        text: text,
+        createdAt: new Date()
+      });
+
+      input.value = "";
+    }
+
+    document.getElementById("addBtn").addEventListener("click", addItem);
+    document.getElementById("noteInput").addEventListener("keypress", (e) => {
+      if (e.key === "Enter") addItem();
+    });
+  </script>
+</body>
+</html>
