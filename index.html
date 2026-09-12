@@ -7,6 +7,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<!-- Firebase Realtime Sync SDKs -->
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
 <style>
   :root{
     --bg:#f5f5f7;
@@ -72,7 +75,6 @@
 
   #app{display:flex;min-height:100vh;}
 
-  /* ---------- Sidebar ---------- */
   .sidebar{
     width:230px;
     flex-shrink:0;
@@ -136,7 +138,6 @@
   }
   .btn-add-sidebar:hover{filter:brightness(1.06);}
 
-  /* ---------- Main ---------- */
   .main{flex:1;min-width:0;padding:34px 40px 60px 40px;max-width:1440px;}
   @keyframes pageFadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
   .page-fade{animation:pageFadeIn .25s ease;}
@@ -170,7 +171,6 @@
   .btn-ghost:active{transform:scale(.96);}
   .btn-danger{color:var(--loss);}
 
-  /* ---------- KPI grid ---------- */
   .kpi-row{display:grid;grid-template-columns:1.4fr repeat(4, 1fr);gap:14px;margin-bottom:20px;}
   .kpi-hero{
     background:var(--surface);
@@ -200,7 +200,6 @@
   .neg{color:var(--loss);}
   .neu{color:var(--text-dim);}
 
-  /* ---------- Panels / charts ---------- */
   .panel-grid{display:grid;grid-template-columns:1.7fr 1fr;gap:14px;margin-bottom:14px;}
   .panel-grid.thirds{grid-template-columns:1fr 1fr 1fr;}
   .panel-grid.halves{grid-template-columns:1fr 1fr;}
@@ -213,7 +212,6 @@
   .panel-note{font-size:11.5px;color:var(--text-faint);margin:0 0 14px 0;}
   .chart-wrap{position:relative;width:100%;}
 
-  /* ---------- Table ---------- */
   .table-toolbar{display:flex;gap:10px;align-items:center;margin-bottom:14px;flex-wrap:wrap;}
   input[type=text],input[type=search],select,input[type=number],input[type=date],input[type=time]{
     background:var(--surface);border:1px solid var(--border);color:var(--text);
@@ -261,7 +259,6 @@
   .empty-state{text-align:center;padding:60px 20px;color:var(--text-faint);}
   .empty-state .serif{font-size:19px;color:var(--text-dim);display:block;margin-bottom:6px;}
 
-  /* ---------- Modal ---------- */
   @keyframes overlayFadeIn{from{opacity:0;}to{opacity:1;}}
   @keyframes overlayFadeOut{from{opacity:1;}to{opacity:0;}}
   @keyframes modalPopIn{from{opacity:0;transform:translateY(14px) scale(.97);}to{opacity:1;transform:translateY(0) scale(1);}}
@@ -304,7 +301,6 @@
   .form-preview .fp-item .fp-val{font-family:'Inter',sans-serif;font-size:16px;font-weight:700;}
   .modal-foot{display:flex;justify-content:flex-end;gap:10px;margin-top:20px;}
 
-  /* ---------- Image upload slots ---------- */
   .img-upload-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
   .img-slot{background:var(--surface-2);border:1px solid var(--border-soft);border-radius:var(--radius-s);padding:8px;display:flex;flex-direction:column;gap:6px;}
   .img-slot-label{font-size:10.5px;color:var(--text-faint);}
@@ -313,7 +309,6 @@
   .img-slot-actions{display:flex;gap:6px;}
   .img-slot-actions .btn-ghost{flex:1;font-size:11px;padding:5px 0;text-align:center;}
 
-  /* ---------- Trade detail modal ---------- */
   .detail-modal{width:760px;}
   .detail-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px 16px;margin-bottom:18px;padding-bottom:16px;border-bottom:1px solid var(--border-soft);}
   .detail-item-lbl{font-size:10.5px;color:var(--text-faint);margin-bottom:3px;}
@@ -326,14 +321,12 @@
   .detail-img-lbl{font-size:10.5px;color:var(--text-faint);margin-bottom:6px;}
   .detail-img-thumb{width:100%;border-radius:6px;cursor:zoom-in;display:block;object-fit:cover;max-height:160px;}
 
-  /* ---------- Analytics dimension grid ---------- */
   .dim-table-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:14px;}
   .dim-table-card{background:var(--surface-2);border:1px solid var(--border-soft);border-radius:var(--radius-s);padding:12px 14px;}
   .dim-table-card .dim-table-title{font-size:12px;font-weight:700;margin:0 0 8px 0;color:var(--text);}
   .dim-table-card table{font-size:11.5px;}
   .dim-table-card td,.dim-table-card th{padding:6px 6px;}
 
-  /* ---------- Calendar ---------- */
   .cal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}
   .cal-nav{display:flex;gap:6px;align-items:center;flex-wrap:wrap;}
   .cal-nav select,.cal-nav input[type=number]{padding:6px 8px;font-size:12.5px;}
@@ -353,9 +346,6 @@
   .cal-cell .n{font-size:9.5px;color:var(--text-faint);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .legend{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text-faint);margin-top:14px;flex-wrap:wrap;}
   .legend .sw{width:12px;height:12px;border-radius:3px;}
-
-  .footer-note{text-align:center;color:var(--text-faint);font-size:11.5px;margin-top:40px;}
-  .dim-select{margin-bottom:14px;}
 
   @media (max-width: 1100px){
     .kpi-row{grid-template-columns:repeat(2,1fr);}
@@ -377,7 +367,6 @@
     .page-title{font-size:22px;}
   }
 
-  /* ---------- Mobile bottom nav ---------- */
   .mobile-nav{display:none;}
   .mobile-fab{display:none;}
   @media (max-width: 780px){
@@ -430,57 +419,65 @@ const OUTCOMES = {
   be_win:  {label:'Breakeven → Win',    class:'be_win'},
   be_loss: {label:'Breakeven → Loss',   class:'be_loss'},
 };
-/* Defensive accessor: some older/imported trades may carry an outcome value
-   that no longer exists in OUTCOMES (e.g. legacy data, manual edits, or a
-   corrupted record). Fall back to a visible "Unknown" badge instead of
-   throwing, so a single bad record can't break the whole page. */
 function outcomeMeta(o){ return OUTCOMES[o] || {label:'Unknown', class:'dim'}; }
 const DOW = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 const DOW_SHORT = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 const MONTH_ABBR = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 const JOURNAL_LABELS = { live:'Trading', backtest:'Backtesting' };
 
-/* ============================= STORAGE (hybrid) ============================= */
-/* Prefers Claude's artifact storage (window.storage) when running inside a Claude
-   conversation. Falls back to localStorage so the file works as a true standalone
-   desktop app when opened directly in a browser. Falls back to in-memory as a last resort. */
-let storageMode = 'memory';
-let memoryStore = {};
-function hasClaudeStorage(){ return typeof window.storage !== 'undefined' && window.storage && typeof window.storage.get === 'function'; }
+/* ============================= STORAGE & FIREBASE CLOUD SYNC ============================= */
+let storageMode = 'local';
+let dbRef = null;
+
 function hasLocalStorage(){
   try{ const k='__fj_test__'; localStorage.setItem(k,'1'); localStorage.removeItem(k); return true; }catch(e){ return false; }
 }
+
 async function storageGet(key){
-  if(storageMode==='claude'){
-    try{ const r = await window.storage.get(key); return r ? r.value : null; }catch(e){ return null; }
-  }
-  if(storageMode==='local'){
-    return localStorage.getItem('fj:'+key);
-  }
-  return memoryStore[key] || null;
+  return localStorage.getItem('fj:'+key);
 }
+
 async function storageSet(key, value){
-  if(storageMode==='claude'){
-    try{ await window.storage.set(key, value); return true; }catch(e){ return false; }
-  }
-  if(storageMode==='local'){
-    try{ localStorage.setItem('fj:'+key, value); return true; }catch(e){ return false; }
-  }
-  memoryStore[key] = value; return true;
+  try{ localStorage.setItem('fj:'+key, value); return true; }catch(e){ return false; }
 }
-function initStorageMode(){
-  if(hasClaudeStorage()) storageMode = 'claude';
-  else if(hasLocalStorage()) storageMode = 'local';
-  else storageMode = 'memory';
+
+function initFirebaseSync() {
+  const cfgStr = state.settings.firebaseConfig;
+  if (!cfgStr) return;
+  try {
+    const cfg = typeof cfgStr === 'string' ? JSON.parse(cfgStr) : cfgStr;
+    if (cfg && cfg.apiKey && typeof firebase !== 'undefined') {
+      if (!firebase.apps.length) {
+        firebase.initializeApp(cfg);
+      }
+      dbRef = firebase.database().ref('futures_journal');
+      dbRef.on('value', (snapshot) => {
+        const val = snapshot.val();
+        if (val) {
+          if (Array.isArray(val.trades)) {
+            state.trades = val.trades;
+            localStorage.setItem('fj:trades', JSON.stringify(state.trades));
+          }
+          if (val.settings) {
+            state.settings = Object.assign(state.settings, val.settings);
+            localStorage.setItem('fj:settings', JSON.stringify(state.settings));
+          }
+          if (state.loaded) renderMain();
+        }
+      });
+    }
+  } catch (e) {
+    console.warn('Firebase sync setup warning:', e);
+  }
 }
 
 /* ============================= STATE ============================= */
 let state = {
   trades: [],
-  settings: { defaultRiskPerTrade: 100, theme: 'light', lastJournal: 'live', lastCategory: 'real' },
+  settings: { defaultRiskPerTrade: 100, theme: 'light', lastJournal: 'live', lastCategory: 'real', firebaseConfig: '' },
   activeTab: 'dashboard',
   journal: 'live',
-  category: 'real', // 'real' | 'demo' | 'backtest' — drives Dashboard / Analytics / Calendar
+  category: 'real',
   range: 'all',
   logFilters: { symbol:'all', outcome:'all', model:'all', demo:'all', search:'', sortKey:'date', sortDir:'desc' },
   calMonth: new Date().getMonth(),
@@ -495,7 +492,6 @@ function escapeHtml(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;'
 function truncate(s,n){ if(!s) return '—'; return s.length>n ? s.slice(0,n-1)+'…' : s; }
 
 async function loadData(){
-  initStorageMode();
   try{ const v = await storageGet('trades'); state.trades = v ? JSON.parse(v) : []; }catch(e){ state.trades = []; }
   const symbolMigration = { 'NQ1!':'NQ', 'ES1!':'ES' };
   state.trades.forEach(t=>{ if(symbolMigration[t.symbol]) t.symbol = symbolMigration[t.symbol]; });
@@ -505,14 +501,25 @@ async function loadData(){
   document.documentElement.setAttribute('data-theme', state.settings.theme === 'dark' ? 'dark' : 'light');
   state.loaded = true;
 }
-async function saveTrades(){ await storageSet('trades', JSON.stringify(state.trades)); }
-async function saveSettings(){ await storageSet('settings', JSON.stringify(state.settings)); }
+
+async function saveTrades(){ 
+  await storageSet('trades', JSON.stringify(state.trades)); 
+  if (dbRef) {
+    try { await dbRef.child('trades').set(state.trades); } catch(e){ console.error('Cloud sync failed:', e); }
+  }
+}
+async function saveSettings(){ 
+  await storageSet('settings', JSON.stringify(state.settings)); 
+  if (dbRef) {
+    try { await dbRef.child('settings').set(state.settings); } catch(e){ console.error('Cloud sync failed:', e); }
+  }
+}
 
 /* ============================= CALC HELPERS ============================= */
 function dayOfWeek(dateStr){
   if(!dateStr) return null;
   const d = new Date(dateStr+'T00:00:00');
-  return d.getDay(); // 0=Sun..6=Sat
+  return d.getDay();
 }
 function rMultiple(t){
   const rr = parseFloat(t.rr)||0;
@@ -545,15 +552,9 @@ function withDerived(t){
     outClass: outcomeClass(t),
   });
 }
-/* All raw trades belonging to the currently active journal (Trading vs Backtesting) —
-   used by the Trade Log page, which keeps its own real/demo filter dropdown. */
 function journalTrades(){
   return state.trades.filter(t => (t.journalType==='backtest' ? 'backtest' : 'live') === state.journal);
 }
-/* Three completely separate buckets, each with its own cash total:
-   'real'     — live trades, real money, demo excluded
-   'demo'     — live trades flagged as demo (paper money, tracked but never mixed into real cash)
-   'backtest' — backtesting journal, hypothetical results only */
 const CATEGORY_LABELS = { real:'Real trading', demo:'Demo trading', backtest:'Backtesting' };
 function categoryOf(t){
   if((t.journalType==='backtest'?'backtest':'live') === 'backtest') return 'backtest';
@@ -562,8 +563,6 @@ function categoryOf(t){
 function categoryTrades(cat){
   return state.trades.filter(t => categoryOf(t) === (cat || state.category));
 }
-/* Whether a trade's dollar value should count toward real-money totals —
-   demo trades and backtest trades never count as real cash. */
 function isCashable(t){ return categoryOf(t) === 'real'; }
 function fmtMoney(n, showSign){
   const s = Math.abs(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
@@ -572,7 +571,7 @@ function fmtMoney(n, showSign){
 }
 function fmtPct(n){ return n.toFixed(1) + '%'; }
 function colorForPnl(n){ return n>0?'pos':(n<0?'neg':'neu'); }
-function ratingClass(r){ return 'rating-' + r.replace('+','plus'); }
+function ratingClass(r){ return 'rating-' + (r||'').replace('+','plus'); }
 function rrLabel(rr){ return (Math.round(rr*100)/100) + ':1'; }
 
 function filteredTrades(){
@@ -637,14 +636,14 @@ function statRow(label, t){
 }
 
 /* ============================= MONTHLY PERFORMANCE ============================= */
-function monthKey(dateStr){ return dateStr.slice(0,7); } // 'YYYY-MM'
+function monthKey(dateStr){ return dateStr.slice(0,7); }
 function monthLabel(key){
   const parts = key.split('-'); const y = parts[0]; const m = parseInt(parts[1],10);
   return MONTH_ABBR[m-1] + ' ' + y;
 }
 function monthlyStats(trades){
   const g = groupBy(trades, t=>monthKey(t.date));
-  const keys = Object.keys(g).sort(); // 'YYYY-MM' sorts chronologically as a string
+  const keys = Object.keys(g).sort();
   return keys.map(k=>{
     const arr = g[k];
     const net = arr.reduce((s,t)=>s+t.pnl,0);
@@ -747,6 +746,7 @@ function render(){
   });
   renderMain();
 }
+
 function mobileNavItem(tab, label, icon){
   return `<div class="mobile-nav-item ${state.activeTab===tab?'active':''}" data-tab="${tab}">${ICONS[icon]}<span>${label}</span></div>`;
 }
@@ -792,10 +792,7 @@ function categorySubtitle(cat){
   if(cat==='demo') return 'Demo account · every dollar your demo strategy has earned, kept in its own ledger';
   return 'Backtest account · every dollar your backtested strategy has earned, kept in its own ledger';
 }
-/* Always-visible strip showing every dollar earned, split into its own
-   ledger — real, demo, and backtest each accumulate their own total and
-   are never summed together. Clicking a card switches the whole page
-   (KPIs, charts, tables) to that ledger. */
+
 function renderCategoryOverviewCards(){
   const cats = ['real','demo','backtest'];
   const tag = { real:'Real account', demo:'Demo account', backtest:'Backtest account' };
@@ -813,6 +810,7 @@ function renderCategoryOverviewCards(){
     }).join('')}
   </div>`;
 }
+
 function bindCategoryOverviewCards(){
   document.querySelectorAll('.cat-card').forEach(el=>{
     el.onclick = ()=>{
@@ -823,13 +821,12 @@ function bindCategoryOverviewCards(){
     };
   });
 }
-/* Cumulative dollars earned over time within a single ledger — treats every
-   trade's dollar P&L (win, loss, breakeven) as real earnings toward that
-   ledger's running total. Ledgers are never mixed. */
+
 function equityCurve(trades){
   let cum = 0;
   return trades.map(t=>{ cum += t.pnl; return { date: t.date, cum }; });
 }
+
 function drawEquityChart(trades, canvasId){
   chartDefaults(); destroyChart(canvasId);
   const ctx = document.getElementById(canvasId); if(!ctx) return;
@@ -842,9 +839,11 @@ function drawEquityChart(trades, canvasId){
     options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}, tooltip:{callbacks:{label:(c)=>' '+fmtMoney(c.parsed.y)}}},
       scales:{ x:{grid:{display:false}, ticks:{maxTicksLimit:8, color:cssVar('--text-faint'),font:{size:10}}}, y:{grid:{color:cssVar('--border-soft')}, ticks:{callback:(v)=>'$'+v, color:cssVar('--text-faint'),font:{size:10.5}}} } } });
 }
+
 function navItem(tab, label, icon){
   return `<div class="nav-item ${state.activeTab===tab?'active':''}" data-tab="${tab}">${ICONS[icon]}<span>${label}</span></div>`;
 }
+
 function renderMain(){
   const main = document.getElementById('main');
   main.classList.remove('page-fade');
@@ -856,6 +855,7 @@ function renderMain(){
   if(state.activeTab==='calendar') return renderCalendar(main);
   if(state.activeTab==='settings') return renderSettings(main);
 }
+
 function rangeSegmented(){
   const labels = {all:'All time', month:'This month', week:'This week', year:'This year'};
   return `<div class="segmented" id="rangeSeg">
@@ -948,6 +948,7 @@ function drawWLDonut(s){
     data:{ labels:['Wins','Losses','Breakeven'], datasets:[{ data:[s.wins,s.losses,s.be], backgroundColor:[gain,loss,dim], borderWidth:0 }]},
     options:{ responsive:true, maintainAspectRatio:false, cutout:'68%', plugins:{ legend:{ position:'bottom', labels:{ boxWidth:10, boxHeight:10, padding:16, font:{size:11.5} } } } } });
 }
+
 function drawDowChart(trades, canvasId){
   chartDefaults(); destroyChart(canvasId);
   const ctx = document.getElementById(canvasId); if(!ctx) return;
@@ -1281,6 +1282,7 @@ function renderCalendar(main){
   bindCategoryOverviewCards();
   main.querySelectorAll('.cal-cell[data-date]').forEach(c=>{ c.onclick = ()=> showDayDetail(c.dataset.date, byDay[c.dataset.date]||[]); });
 }
+
 function mix(hexA, hexB, t){
   const a = hexToRgb(hexA), b = hexToRgb(hexB);
   const r = Math.round(a[0]+(b[0]-a[0])*t), g = Math.round(a[1]+(b[1]-a[1])*t), bl = Math.round(a[2]+(b[2]-a[2])*t);
@@ -1314,7 +1316,7 @@ function showDayDetail(date, trades){
 /* ============================= SETTINGS ============================= */
 function renderSettings(main){
   main.innerHTML = `
-    <div class="page-header"><div><h1 class="page-title">Settings</h1><p class="page-subtitle">Risk &amp; data preferences</p></div></div>
+    <div class="page-header"><div><h1 class="page-title">Settings</h1><p class="page-subtitle">Risk, themes &amp; cross-device sync</p></div></div>
     <div class="panel" style="max-width:480px;">
       <p class="panel-title">Appearance</p>
       <p class="panel-note">Switch between light and dark theme</p>
@@ -1324,8 +1326,16 @@ function renderSettings(main){
       </div>
     </div>
     <div class="panel" style="max-width:480px;margin-top:14px;">
+      <p class="panel-title">Cross-device Cloud Sync (Firebase)</p>
+      <p class="panel-note">Paste your Firebase Realtime Database JSON configuration object to keep data synced automatically across every phone and computer.</p>
+      <textarea id="firebaseCfg" rows="4" style="width:100%;font-family:monospace;font-size:11px;" placeholder='{"apiKey":"...", "authDomain":"...", "databaseURL":"..."}'>${escapeHtml(state.settings.firebaseConfig || '')}</textarea>
+      <div style="display:flex;justify-content:flex-end;margin-top:8px;">
+        <button class="btn-primary" id="saveFirebaseCfg">Save Cloud Sync Config</button>
+      </div>
+    </div>
+    <div class="panel" style="max-width:480px;margin-top:14px;">
       <p class="panel-title">Default risk per trade</p>
-      <p class="panel-note">Pre-fills the "Risk per trade" field when logging a new trade. Each trade stores its own risk amount, so past trades are never affected by changes made here.</p>
+      <p class="panel-note">Pre-fills the "Risk per trade" field when logging a new trade.</p>
       <div style="display:flex;gap:10px;">
         <input type="number" id="defaultRiskPerTrade" value="${state.settings.defaultRiskPerTrade}" style="flex:1;">
         <button class="btn-primary" id="saveDefaultRisk">Save</button>
@@ -1333,7 +1343,7 @@ function renderSettings(main){
     </div>
     <div class="panel" style="max-width:480px;margin-top:14px;">
       <p class="panel-title">Backup &amp; restore</p>
-      <p class="panel-note">${state.trades.length} trades stored. Export a JSON backup any time, or move your journal between devices.</p>
+      <p class="panel-note">${state.trades.length} trades stored.</p>
       <div style="display:flex;gap:10px;flex-wrap:wrap;">
         <button class="btn-secondary" id="exportJson">Export backup (.json)</button>
         <label class="btn-secondary" style="cursor:pointer;">Import backup<input type="file" id="importJson" accept="application/json" style="display:none;"></label>
@@ -1354,6 +1364,12 @@ function renderSettings(main){
       saveSettings();
     };
   });
+  document.getElementById('saveFirebaseCfg').onclick = async ()=>{
+    state.settings.firebaseConfig = document.getElementById('firebaseCfg').value.trim();
+    await saveSettings();
+    initFirebaseSync();
+    alert('Cloud Sync settings updated.');
+  };
   document.getElementById('saveDefaultRisk').onclick = ()=>{ state.settings.defaultRiskPerTrade = parseFloat(document.getElementById('defaultRiskPerTrade').value)||0; render(); saveSettings(); };
   document.getElementById('wipeData').onclick = async ()=>{ if(!confirm('This will permanently delete all logged trades. Continue?')) return; state.trades = []; await saveTrades(); render(); };
   document.getElementById('exportJson').onclick = ()=>{
@@ -1374,7 +1390,7 @@ function renderSettings(main){
         state.trades = parsed.trades;
         if(parsed.settings) state.settings = Object.assign(state.settings, parsed.settings);
         await saveTrades(); await saveSettings(); render();
-      }catch(err){ alert('Could not read that file — make sure it is a Futures Journal backup .json file.'); }
+      }catch(err){ alert('Could not read file — verify it is a Futures Journal backup .json file.'); }
     };
     reader.readAsText(file);
   };
@@ -1403,11 +1419,13 @@ function readAndCompressImage(file){
     reader.readAsDataURL(file);
   });
 }
+
 const TF_SLOTS = [
   {key:'imgLow',  label:'Low TF (1–5m)'},
   {key:'imgMid',  label:'Mid TF (15–30m)'},
   {key:'imgHigh', label:'High TF (1h–1d)'},
 ];
+
 function imgSlotHtml(key, label, dataUrl){
   return `
     <div class="img-slot" id="imgSlot_${key}">
@@ -1430,8 +1448,13 @@ function openTradeModal(id){
     journalType: state.journal, demo:'no', riskPerTrade: state.settings.defaultRiskPerTrade,
     imgLow:null, imgMid:null, imgHigh:null,
   };
-  const jType = t.journalType==='backtest' ? 'backtest' : 'live';
-  const imgState = { imgLow: t.imgLow||null, imgMid: t.imgMid||null, imgHigh: t.imgHigh||null };
+  let jType = t.journalType==='backtest' ? 'backtest' : 'live';
+  let demoVal = t.demo==='yes' ? 'yes' : 'no';
+  let dirVal = t.direction==='short' ? 'short' : 'long';
+  let po3UsedVal = t.po3Used==='no' ? 'no' : 'yes';
+  let tapeVal = t.tapeReading==='yes' ? 'yes' : 'no';
+  let imgState = { imgLow: t.imgLow||null, imgMid: t.imgMid||null, imgHigh: t.imgHigh||null };
+
   const overlay = document.createElement('div');
   overlay.className = 'overlay';
   overlay.id = 'modalOverlay';
@@ -1458,264 +1481,283 @@ function openTradeModal(id){
           <select id="fSymbolM">${Object.keys(SYMBOLS).map(s=>`<option value="${s}" ${t.symbol===s?'selected':''}>${s}</option>`).join('')}</select>
         </div>
         <div class="form-field"><label>Journal</label>
-          <div class="toggle-row">
-            <button type="button" class="toggle-btn ${jType==='live'?'active':''}" data-jtype="live">Trading</button>
-            <button type="button" class="toggle-btn ${jType==='backtest'?'active':''}" data-jtype="backtest">Backtesting</button>
+          <div class="toggle-row" id="wrapJType">
+            <button type="button" class="toggle-btn ${jType==='live'?'active':''}" data-val="live">Trading</button>
+            <button type="button" class="toggle-btn ${jType==='backtest'?'active':''}" data-val="backtest">Backtesting</button>
           </div>
         </div>
         <div class="form-field" id="demoFieldWrap" style="${jType==='backtest'?'display:none;':''}"><label>Demo trade</label>
-          <div class="toggle-row">
-            <button type="button" class="toggle-btn ${t.demo==='yes'?'active':''}" data-demo="yes">Demo</button>
-            <button type="button" class="toggle-btn ${(t.demo||'no')==='no'?'active':''}" data-demo="no">Real money</button>
+          <div class="toggle-row" id="wrapDemo">
+            <button type="button" class="toggle-btn ${demoVal==='yes'?'active':''}" data-val="yes">Demo</button>
+            <button type="button" class="toggle-btn ${demoVal==='no'?'active':''}" data-val="no">Real money</button>
           </div>
         </div>
         <div class="form-field"><label>Rating</label>
           <select id="fRating">${RATINGS.map(r=>`<option value="${r}" ${t.rating===r?'selected':''}>${r}</option>`).join('')}</select>
         </div>
         <div class="form-field"><label>Direction</label>
-          <div class="toggle-row">
-            <button type="button" class="toggle-btn ${t.direction==='long'?'active':''}" data-dir="long">Long</button>
-            <button type="button" class="toggle-btn ${t.direction==='short'?'active':''}" data-dir="short">Short</button>
+          <div class="toggle-row" id="wrapDir">
+            <button type="button" class="toggle-btn ${dirVal==='long'?'active':''}" data-val="long">Long</button>
+            <button type="button" class="toggle-btn ${dirVal==='short'?'active':''}" data-val="short">Short</button>
           </div>
         </div>
         <div class="form-field"><label>PO3 used?</label>
-          <div class="toggle-row">
-            <button type="button" class="toggle-btn ${(t.po3Used||'yes')==='yes'?'active':''}" data-po3used="yes">Yes</button>
-            <button type="button" class="toggle-btn ${t.po3Used==='no'?'active':''}" data-po3used="no">No</button>
+          <div class="toggle-row" id="wrapPo3Used">
+            <button type="button" class="toggle-btn ${po3UsedVal==='yes'?'active':''}" data-val="yes">Yes</button>
+            <button type="button" class="toggle-btn ${po3UsedVal==='no'?'active':''}" data-val="no">No</button>
           </div>
         </div>
-        <div class="form-field" id="po3FieldWrap" style="${t.po3Used==='no'?'display:none;':''}"><label>PO3</label>
-          <select id="fPo3">${PO3_WINDOWS.map(p=>`<option value="${p}" ${t.po3===p?'selected':''}>${p}</option>`).join('')}</select>
+        <div class="form-field" id="wrapPo3Window" style="${po3UsedVal==='no'?'display:none;':''}"><label>PO3 Window</label>
+          <select id="fPo3">${PO3_WINDOWS.map(w=>`<option value="${w}" ${t.po3===w?'selected':''}>${w}</option>`).join('')}</select>
         </div>
         <div class="form-field"><label>Model</label>
           <select id="fModelM">${MODELS.map(m=>`<option value="${m}" ${t.model===m?'selected':''}>${m}</option>`).join('')}</select>
         </div>
-        <div class="form-field"><label>Entry timeframe</label>
+        <div class="form-field"><label>Entry Timeframe</label>
           <select id="fEntryTf">${TIMEFRAMES.map(tf=>`<option value="${tf}" ${t.entryTf===tf?'selected':''}>${tf}</option>`).join('')}</select>
         </div>
-        <div class="form-field"><label>Risk per trade ($)</label>
-          <input type="number" id="fRisk" min="0" step="0.01" value="${t.riskPerTrade!=null && t.riskPerTrade!=='' ? t.riskPerTrade : state.settings.defaultRiskPerTrade}">
-        </div>
-        <div class="form-field"><label>Risk : Reward (X : 1)</label>
-          <div style="display:flex;align-items:center;gap:8px;">
-            <input type="number" id="fRR" min="0.01" step="0.01" value="${t.rr}" style="flex:1;">
-            <span style="color:var(--text-dim);font-weight:600;">: 1</span>
-          </div>
-        </div>
         <div class="form-field"><label>Outcome</label>
-          <select id="fOutcomeM">${Object.keys(OUTCOMES).map(k=>`<option value="${k}" ${t.outcome===k?'selected':''}>${OUTCOMES[k].label}</option>`).join('')}</select>
+          <select id="fOutcomeM">${Object.keys(OUTCOMES).map(o=>`<option value="${o}" ${t.outcome===o?'selected':''}>${OUTCOMES[o].label}</option>`).join('')}</select>
         </div>
-        <div class="form-field"><label>Tape reading used</label>
-          <div class="toggle-row">
-            <button type="button" class="toggle-btn ${t.tapeReading==='yes'?'active':''}" data-tape="yes">Yes</button>
-            <button type="button" class="toggle-btn ${t.tapeReading==='no'?'active':''}" data-tape="no">No</button>
+        <div class="form-field"><label>Tape Reading</label>
+          <div class="toggle-row" id="wrapTape">
+            <button type="button" class="toggle-btn ${tapeVal==='yes'?'active':''}" data-val="yes">Yes</button>
+            <button type="button" class="toggle-btn ${tapeVal==='no'?'active':''}" data-val="no">No</button>
           </div>
         </div>
-        <div class="form-field"><label>Draw on liquidity</label>
-          <select id="fDol">${DOL_OPTIONS.map(o=>`<option value="${o}" ${t.dol===o?'selected':''}>${o}</option>`).join('')}</select>
+        <div class="form-field"><label>Risk:Reward (RR)</label>
+          <input type="number" step="0.1" id="fRr" value="${t.rr}">
         </div>
-        <div class="form-field"><label>Psychology / mental state</label>
-          <input type="text" id="fPsych" placeholder="e.g. calm, FOMO, revenge trade" value="${escapeHtml(t.psych||'')}">
+        <div class="form-field"><label>Risk Amount ($)</label>
+          <input type="number" step="1" id="fRisk" value="${t.riskPerTrade}">
         </div>
-        <div class="form-field span2"><label>Notes</label>
-          <textarea id="fNotes" rows="3" placeholder="Describe the setup, execution, what went right or wrong…">${escapeHtml(t.notes||'')}</textarea>
+        <div class="form-field span2"><label>Draw on Liquidity (DOL)</label>
+          <select id="fDol">${DOL_OPTIONS.map(d=>`<option value="${d}" ${t.dol===d?'selected':''}>${d}</option>`).join('')}</select>
         </div>
-        <div class="form-field span2"><label>Chart screenshots</label>
-          <div class="img-upload-row">
-            ${TF_SLOTS.map(s=>imgSlotHtml(s.key, s.label, imgState[s.key])).join('')}
+        <div class="form-field span2"><label>Psychology / Emotion</label>
+          <input type="text" id="fPsych" placeholder="e.g., Calm, FOMO, Patient..." value="${escapeHtml(t.psych)}">
+        </div>
+        <div class="form-field span2"><label>Notes &amp; Confluences</label>
+          <textarea id="fNotes" rows="3" placeholder="Trade confluences, entry reasons, key levels...">${escapeHtml(t.notes)}</textarea>
+        </div>
+        <div class="form-field span2"><label>Chart Screenshots</label>
+          <div class="img-upload-row" id="imgUploadContainer">
+            ${TF_SLOTS.map(s => imgSlotHtml(s.key, s.label, imgState[s.key])).join('')}
           </div>
         </div>
-        <div class="form-preview" id="livePreview"></div>
+        <div class="form-preview">
+          <div class="fp-item"><div class="fp-lbl">Est. P&amp;L</div><div class="fp-val num" id="fpPnl">$0.00</div></div>
+          <div class="fp-item"><div class="fp-lbl">Day of Week</div><div class="fp-val" id="fpDow">—</div></div>
+        </div>
       </div>
       <div class="modal-foot">
-        <button class="btn-secondary" id="modalCancel">Cancel</button>
-        <button class="btn-primary" id="modalSave">${existing?'Save changes':'Log trade'}</button>
+        <button type="button" class="btn-secondary" id="btnCancelModal">Cancel</button>
+        <button type="button" class="btn-primary" id="btnSaveModal">Save Trade</button>
       </div>
     </div>
   `;
   document.body.appendChild(overlay);
 
-  let dirVal = t.direction, tapeVal = t.tapeReading;
-  let jTypeVal = jType, demoVal = t.demo || 'no';
-  let po3UsedVal = t.po3Used || 'yes';
+  function updateModalPreview(){
+    const dVal = document.getElementById('fDate').value;
+    const dowIdx = dayOfWeek(dVal);
+    document.getElementById('dowHint').textContent = dowIdx !== null ? DOW[dowIdx] : '';
+    document.getElementById('fpDow').textContent = dowIdx !== null ? DOW_SHORT[dowIdx] : '—';
+    
+    const outcome = document.getElementById('fOutcomeM').value;
+    const rr = parseFloat(document.getElementById('fRr').value) || 0;
+    const risk = parseFloat(document.getElementById('fRisk').value) || 0;
+    let rMult = 0;
+    if(outcome === 'win') rMult = rr;
+    else if(outcome === 'loss') rMult = -1;
+    const pnl = rMult * risk;
+    const pnlEl = document.getElementById('fpPnl');
+    pnlEl.textContent = fmtMoney(pnl, true);
+    pnlEl.className = 'fp-val num ' + colorForPnl(pnl);
+  }
 
-  overlay.querySelectorAll('[data-dir]').forEach(b=>{
-    b.onclick = ()=>{ dirVal = b.dataset.dir; overlay.querySelectorAll('[data-dir]').forEach(x=>x.classList.toggle('active', x===b)); };
-  });
-  overlay.querySelectorAll('[data-tape]').forEach(b=>{
-    b.onclick = ()=>{ tapeVal = b.dataset.tape; overlay.querySelectorAll('[data-tape]').forEach(x=>x.classList.toggle('active', x===b)); };
-  });
-  overlay.querySelectorAll('[data-jtype]').forEach(b=>{
-    b.onclick = ()=>{
-      jTypeVal = b.dataset.jtype;
-      overlay.querySelectorAll('[data-jtype]').forEach(x=>x.classList.toggle('active', x===b));
-      document.getElementById('demoFieldWrap').style.display = jTypeVal==='backtest' ? 'none' : '';
-    };
-  });
-  overlay.querySelectorAll('[data-demo]').forEach(b=>{
-    b.onclick = ()=>{ demoVal = b.dataset.demo; overlay.querySelectorAll('[data-demo]').forEach(x=>x.classList.toggle('active', x===b)); };
-  });
-  overlay.querySelectorAll('[data-po3used]').forEach(b=>{
-    b.onclick = ()=>{
-      po3UsedVal = b.dataset.po3used;
-      overlay.querySelectorAll('[data-po3used]').forEach(x=>x.classList.toggle('active', x===b));
-      document.getElementById('po3FieldWrap').style.display = po3UsedVal==='no' ? 'none' : '';
-    };
-  });
+  function setupToggleGroup(wrapperId, onChange){
+    const wrap = document.getElementById(wrapperId);
+    if(!wrap) return;
+    wrap.querySelectorAll('button').forEach(btn => {
+      btn.onclick = () => {
+        wrap.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        if(onChange) onChange(btn.dataset.val);
+      };
+    });
+  }
 
-  function bindImgSlot(key, label){
-    const input = overlay.querySelector(`[data-imginput="${key}"]`);
-    if(input) input.onchange = async (e)=>{
-      const file = e.target.files[0]; if(!file) return;
-      try{ imgState[key] = await readAndCompressImage(file); refreshImgSlot(key, label); }
-      catch(err){ alert('Could not read that image.'); }
-    };
-    const rm = overlay.querySelector(`[data-imgremove="${key}"]`);
-    if(rm) rm.onclick = ()=>{ imgState[key] = null; refreshImgSlot(key, label); };
-    const thumb = overlay.querySelector(`.img-slot-thumb[data-view="${key}"]`);
-    if(thumb) thumb.onclick = ()=> window.open(imgState[key], '_blank');
-  }
-  function refreshImgSlot(key, label){
-    const el = document.getElementById('imgSlot_'+key);
-    if(el) el.outerHTML = imgSlotHtml(key, label, imgState[key]);
-    bindImgSlot(key, label);
-  }
-  TF_SLOTS.forEach(s=> bindImgSlot(s.key, s.label));
+  setupToggleGroup('wrapJType', (val) => {
+    jType = val;
+    document.getElementById('demoFieldWrap').style.display = jType === 'backtest' ? 'none' : 'flex';
+  });
+  setupToggleGroup('wrapDemo', (val) => { demoVal = val; });
+  setupToggleGroup('wrapDir', (val) => { dirVal = val; });
+  setupToggleGroup('wrapPo3Used', (val) => {
+    po3UsedVal = val;
+    document.getElementById('wrapPo3Window').style.display = po3UsedVal === 'no' ? 'none' : 'flex';
+  });
+  setupToggleGroup('wrapTape', (val) => { tapeVal = val; });
 
-  function updateDowHint(){
-    const dv = document.getElementById('fDate').value;
-    document.getElementById('dowHint').textContent = dv ? DOW[dayOfWeek(dv)] : '';
+  document.getElementById('fDate').onchange = updateModalPreview;
+  document.getElementById('fOutcomeM').onchange = updateModalPreview;
+  document.getElementById('fRr').oninput = updateModalPreview;
+  document.getElementById('fRisk').oninput = updateModalPreview;
+  updateModalPreview();
+
+  function bindImgHandlers(){
+    const container = document.getElementById('imgUploadContainer');
+    if(!container) return;
+    container.querySelectorAll('input[data-imginput]').forEach(inp => {
+      inp.onchange = async (e) => {
+        const file = e.target.files[0];
+        if(!file) return;
+        try {
+          const slotKey = inp.dataset.imginput;
+          const compressed = await readAndCompressImage(file);
+          imgState[slotKey] = compressed;
+          rebuildImgSlots();
+        } catch(err) {
+          alert('Could not process image.');
+        }
+      };
+    });
+    container.querySelectorAll('[data-imgremove]').forEach(btn => {
+      btn.onclick = () => {
+        const slotKey = btn.dataset.imgremove;
+        imgState[slotKey] = null;
+        rebuildImgSlots();
+      };
+    });
   }
-  function updatePreview(){
-    let rrv = parseFloat(document.getElementById('fRR').value); if(!rrv || rrv<0.01) rrv = 0.01;
-    const risk = parseFloat(document.getElementById('fRisk').value)||0;
-    const draft = { outcome: document.getElementById('fOutcomeM').value, rr: rrv };
-    const r = rMultiple(draft);
-    const pnl = r * risk;
-    document.getElementById('livePreview').innerHTML = `
-      <div class="fp-item"><div class="fp-lbl">Est. P&amp;L</div><div class="fp-val ${colorForPnl(pnl)}">${fmtMoney(pnl,true)}</div></div>
-      <div class="fp-item"><div class="fp-lbl">Day of week</div><div class="fp-val">${document.getElementById('fDate').value ? DOW[dayOfWeek(document.getElementById('fDate').value)] : '—'}</div></div>
-    `;
+
+  function rebuildImgSlots(){
+    const container = document.getElementById('imgUploadContainer');
+    if(!container) return;
+    container.innerHTML = TF_SLOTS.map(s => imgSlotHtml(s.key, s.label, imgState[s.key])).join('');
+    bindImgHandlers();
   }
-  updateDowHint(); updatePreview();
-  document.getElementById('fDate').oninput = ()=>{ updateDowHint(); updatePreview(); };
-  document.getElementById('fOutcomeM').onchange = updatePreview;
-  document.getElementById('fRR').oninput = updatePreview;
-  document.getElementById('fRisk').oninput = updatePreview;
+  bindImgHandlers();
+
+  function closeModal(){
+    overlay.classList.add('closing');
+    setTimeout(() => overlay.remove(), 160);
+  }
 
   document.getElementById('modalClose').onclick = closeModal;
-  document.getElementById('modalCancel').onclick = closeModal;
-  overlay.onclick = (e)=>{ if(e.target===overlay) closeModal(); };
-  document.getElementById('modalSave').onclick = async ()=>{
-    const dateVal = document.getElementById('fDate').value;
-    if(!dateVal){ alert('Please select a date.'); return; }
-    let rrVal = parseFloat(document.getElementById('fRR').value);
-    if(!rrVal || rrVal < 0.01) rrVal = 0.01;
-    const riskVal = parseFloat(document.getElementById('fRisk').value)||0;
-    const record = {
+  document.getElementById('btnCancelModal').onclick = closeModal;
+  overlay.onclick = (e) => { if(e.target === overlay) closeModal(); };
+
+  document.getElementById('btnSaveModal').onclick = async () => {
+    const hr = document.getElementById('fTimeHour').value;
+    const mn = document.getElementById('fTimeMinute').value;
+    const timeVal = (hr && mn) ? `${hr}:${mn}` : '';
+
+    const newTrade = {
       id: existing ? existing.id : uid(),
-      date: dateVal,
-      time: (()=>{ const h=document.getElementById('fTimeHour').value, mn=document.getElementById('fTimeMinute').value; return (h && mn) ? `${h}:${mn}` : ''; })(),
+      date: document.getElementById('fDate').value,
+      time: timeVal,
       symbol: document.getElementById('fSymbolM').value,
-      journalType: jTypeVal,
-      demo: jTypeVal==='backtest' ? 'no' : demoVal,
-      riskPerTrade: riskVal,
+      journalType: jType,
+      demo: demoVal,
       rating: document.getElementById('fRating').value,
       direction: dirVal,
       po3Used: po3UsedVal,
-      po3: po3UsedVal==='no' ? 'Not used' : document.getElementById('fPo3').value,
+      po3: po3UsedVal === 'yes' ? document.getElementById('fPo3').value : 'Not used',
       model: document.getElementById('fModelM').value,
       entryTf: document.getElementById('fEntryTf').value,
-      rr: rrVal,
       outcome: document.getElementById('fOutcomeM').value,
       tapeReading: tapeVal,
+      rr: parseFloat(document.getElementById('fRr').value) || 0,
+      riskPerTrade: parseFloat(document.getElementById('fRisk').value) || 0,
       dol: document.getElementById('fDol').value,
-      psych: document.getElementById('fPsych').value.trim(),
-      notes: document.getElementById('fNotes').value.trim(),
-      imgLow: imgState.imgLow, imgMid: imgState.imgMid, imgHigh: imgState.imgHigh,
+      psych: document.getElementById('fPsych').value,
+      notes: document.getElementById('fNotes').value,
+      imgLow: imgState.imgLow,
+      imgMid: imgState.imgMid,
+      imgHigh: imgState.imgHigh,
     };
-    if(existing){ const idx = state.trades.findIndex(x=>x.id===existing.id); state.trades[idx] = record; }
-    else { state.trades.push(record); }
-    const journalChanged = record.journalType !== state.journal;
-    if(journalChanged){ state.journal = record.journalType; state.settings.lastJournal = state.journal; }
+
+    if(existing){
+      const idx = state.trades.findIndex(t => t.id === existing.id);
+      if(idx !== -1) state.trades[idx] = newTrade;
+    } else {
+      state.trades.push(newTrade);
+    }
+
     closeModal();
-    render();
-    saveTrades();
-    if(journalChanged) saveSettings();
+    await saveTrades();
+    renderMain();
   };
-  function closeModal(){ overlay.classList.add('closing'); setTimeout(()=> overlay.remove(), 160); }
 }
 
-/* ============================= MODAL: TRADE DETAIL ============================= */
-function detailItem(label, val){
-  return `<div class="detail-item"><div class="detail-item-lbl">${label}</div><div class="detail-item-val">${val}</div></div>`;
-}
-function detailImgCard(label, src){
-  if(!src) return `<div class="detail-img-card"><div class="detail-img-lbl">${label}</div><div class="img-slot-empty">No image</div></div>`;
-  return `<div class="detail-img-card"><div class="detail-img-lbl">${label}</div><img src="${src}" class="detail-img-thumb"></div>`;
-}
+/* ============================= DETAIL MODAL ============================= */
 function openTradeDetail(id){
-  const raw = state.trades.find(x=>x.id===id);
-  if(!raw) return;
-  const t = withDerived(raw);
+  const t = state.trades.find(x => x.id === id);
+  if(!t) return;
+  const d = withDerived(t);
   const overlay = document.createElement('div');
   overlay.className = 'overlay';
-  overlay.id = 'detailOverlay';
   overlay.innerHTML = `
     <div class="modal detail-modal">
-      <div class="modal-head"><h2>${t.symbol} · ${t.date}</h2><button class="close-x" id="detailClose">×</button></div>
+      <div class="modal-head">
+        <h2>Trade Details</h2>
+        <button class="close-x" id="detailClose">×</button>
+      </div>
       <div class="detail-grid">
-        ${detailItem('Journal', JOURNAL_LABELS[t.journalType])}
-        ${t.journalType==='live' ? detailItem('Demo trade', t.demo==='yes'?'Yes':'No') : ''}
-        ${detailItem('Time', t.time ? `${t.time} ET` : '—')}
-        ${detailItem('Day of week', DOW[t.dow])}
-        ${detailItem('Rating', `<span class="badge ${ratingClass(t.rating)}">${t.rating}</span>`)}
-        ${detailItem('Direction', `<span class="badge ${t.direction}">${t.direction==='long'?'Long':'Short'}</span>`)}
-        ${detailItem('Model', t.model)}
-        ${detailItem('PO3', t.po3)}
-        ${detailItem('Entry timeframe', t.entryTf)}
-        ${detailItem('Outcome', `<span class="badge ${outcomeMeta(t.outcome).class}">${outcomeMeta(t.outcome).label}</span>`)}
-        ${detailItem('Tape reading used', t.tapeReading==='yes'?'Yes':'No')}
-        ${detailItem('Risk : Reward', rrLabel(t.rr))}
-        ${detailItem('Risk per trade', fmtMoney(tradeRisk(t)))}
-        ${detailItem('P&amp;L', `<span class="${colorForPnl(t.pnl)}">${fmtMoney(t.pnl,true)}</span>`)}
-        ${detailItem('Draw on liquidity', escapeHtml(t.dol||'—'))}
+        <div><div class="detail-item-lbl">Date &amp; Time</div><div class="detail-item-val num">${d.date} ${d.time||''} (${DOW_SHORT[d.dow]})</div></div>
+        <div><div class="detail-item-lbl">Instrument</div><div class="detail-item-val">${d.symbol}</div></div>
+        <div><div class="detail-item-lbl">Journal</div><div class="detail-item-val">${JOURNAL_LABELS[d.journalType]} (${d.demo==='yes'?'Demo':'Real'})</div></div>
+        <div><div class="detail-item-lbl">Rating</div><div class="detail-item-val"><span class="badge ${ratingClass(d.rating)}">${d.rating}</span></div></div>
+        <div><div class="detail-item-lbl">Direction</div><div class="detail-item-val"><span class="badge ${d.direction}">${d.direction==='long'?'Long':'Short'}</span></div></div>
+        <div><div class="detail-item-lbl">Model</div><div class="detail-item-val">${d.model}</div></div>
+        <div><div class="detail-item-lbl">PO3 Window</div><div class="detail-item-val">${d.po3}</div></div>
+        <div><div class="detail-item-lbl">Entry TF</div><div class="detail-item-val">${d.entryTf}</div></div>
+        <div><div class="detail-item-lbl">Outcome</div><div class="detail-item-val"><span class="badge ${outcomeMeta(d.outcome).class}">${outcomeMeta(d.outcome).label}</span></div></div>
+        <div><div class="detail-item-lbl">Tape Reading</div><div class="detail-item-val">${d.tapeReading==='yes'?'Yes':'No'}</div></div>
+        <div><div class="detail-item-lbl">Risk:Reward</div><div class="detail-item-val num">${rrLabel(d.rr)}</div></div>
+        <div><div class="detail-item-lbl">P&amp;L</div><div class="detail-item-val num ${colorForPnl(d.pnl)}" style="font-weight:700;">${fmtMoney(d.pnl,true)}</div></div>
       </div>
-      <div class="detail-block">
-        <div class="detail-block-lbl">Psychology / mental state</div>
-        <div class="detail-block-text">${escapeHtml(t.psych||'—')}</div>
-      </div>
-      <div class="detail-block">
-        <div class="detail-block-lbl">Notes</div>
-        <div class="detail-block-text">${escapeHtml(t.notes||'—')}</div>
-      </div>
-      <div class="detail-block">
-        <div class="detail-block-lbl">Chart screenshots</div>
-        <div class="detail-imgs">
-          ${TF_SLOTS.map(s=>detailImgCard(s.label, t[s.key])).join('')}
+      ${d.dol ? `<div class="detail-block"><div class="detail-block-lbl">Draw on Liquidity</div><div class="detail-block-text">${escapeHtml(d.dol)}</div></div>` : ''}
+      ${d.psych ? `<div class="detail-block"><div class="detail-block-lbl">Psychology / State</div><div class="detail-block-text">${escapeHtml(d.psych)}</div></div>` : ''}
+      ${d.notes ? `<div class="detail-block"><div class="detail-block-lbl">Notes &amp; Confluences</div><div class="detail-block-text">${escapeHtml(d.notes)}</div></div>` : ''}
+      ${(d.imgLow || d.imgMid || d.imgHigh) ? `
+        <div class="detail-block">
+          <div class="detail-block-lbl">Chart Screenshots</div>
+          <div class="detail-imgs">
+            ${d.imgLow ? `<div class="detail-img-card"><div class="detail-img-lbl">Low TF</div><img src="${d.imgLow}" class="detail-img-thumb" onclick="window.open('${d.imgLow}')"></div>` : ''}
+            ${d.imgMid ? `<div class="detail-img-card"><div class="detail-img-lbl">Mid TF</div><img src="${d.imgMid}" class="detail-img-thumb" onclick="window.open('${d.imgMid}')"></div>` : ''}
+            ${d.imgHigh ? `<div class="detail-img-card"><div class="detail-img-lbl">High TF</div><img src="${d.imgHigh}" class="detail-img-thumb" onclick="window.open('${d.imgHigh}')"></div>` : ''}
+          </div>
         </div>
-      </div>
+      ` : ''}
       <div class="modal-foot">
-        <button class="btn-secondary" id="detailCloseBtn">Close</button>
-        <button class="btn-primary" id="detailEditBtn">Edit trade</button>
+        <button class="btn-secondary" id="detailEdit">Edit Trade</button>
+        <button class="btn-primary" id="detailDone">Done</button>
       </div>
     </div>
   `;
   document.body.appendChild(overlay);
-  const close = ()=>{ overlay.classList.add('closing'); setTimeout(()=> overlay.remove(), 160); };
-  document.getElementById('detailClose').onclick = close;
-  document.getElementById('detailCloseBtn').onclick = close;
-  overlay.onclick = (e)=>{ if(e.target===overlay) close(); };
-  document.getElementById('detailEditBtn').onclick = ()=>{ close(); openTradeModal(id); };
-  overlay.querySelectorAll('.detail-img-thumb').forEach(img=>{ img.onclick = ()=> window.open(img.src, '_blank'); });
+  function closeDetail(){
+    overlay.classList.add('closing');
+    setTimeout(() => overlay.remove(), 160);
+  }
+  document.getElementById('detailClose').onclick = closeDetail;
+  document.getElementById('detailDone').onclick = closeDetail;
+  overlay.onclick = (e) => { if(e.target === overlay) closeDetail(); };
+  document.getElementById('detailEdit').onclick = () => {
+    closeDetail();
+    openTradeModal(t.id);
+  };
 }
 
 /* ============================= INIT ============================= */
-(async function init(){
-  document.getElementById('app').innerHTML = `<div style="padding:40px;color:#86868b;">Loading journal…</div>`;
+window.onload = async () => {
   await loadData();
   render();
-})();
+  initFirebaseSync();
+};
 </script>
 </body>
 </html>
