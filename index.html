@@ -6,7 +6,7 @@
 <title>Futures Journal</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
@@ -106,7 +106,9 @@
   }
   body.modal-open{overflow:hidden;}
   ::selection{background:var(--accent-dim);color:var(--accent);}
-  .num{font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1,"ss01" 1;}
+  /* Numeric / money values: Manrope has a plain "1" (no bottom serif) and a lighter feel than Inter's ss01 digits */
+  .num{font-family:'Manrope','Inter',sans-serif;font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1;font-weight:600;letter-spacing:-.01em;}
+  .num[style*="font-weight"]{font-weight:600 !important;}
   a{color:inherit;}
   button{font-family:inherit;color:inherit;}
   button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
@@ -251,11 +253,11 @@
   .kpi-hero{padding:22px 26px;display:flex;flex-direction:column;justify-content:center;gap:6px;position:relative;overflow:hidden;}
   .kpi-hero::before{content:'';position:absolute;inset:-40% -20% auto auto;width:60%;height:160%;background:radial-gradient(closest-side, var(--accent-dim), transparent 70%);opacity:.7;pointer-events:none;}
   .kpi-hero .lbl{font-size:12.5px;color:var(--text-2);font-weight:600;}
-  .kpi-hero .val{font-size:40px;font-weight:800;line-height:1;letter-spacing:-1.4px;}
+  .kpi-hero .val{font-size:40px;font-weight:600;line-height:1;letter-spacing:-1px;}
   .kpi-hero .sub{font-size:12.5px;color:var(--text-3);margin-top:2px;font-weight:500;}
   .kpi-card{padding:16px 18px;display:flex;flex-direction:column;justify-content:center;gap:5px;min-width:0;}
   .kpi-card .lbl{font-size:12px;color:var(--text-2);font-weight:600;}
-  .kpi-card .val{font-size:22px;font-weight:800;letter-spacing:-.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .kpi-card .val{font-size:22px;font-weight:600;letter-spacing:-.4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .kpi-card .sub{font-size:11.5px;color:var(--text-3);font-weight:500;}
   .cat-card{cursor:pointer;position:relative;}
   .cat-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-2);}
@@ -277,7 +279,7 @@
   .streak-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding-top:4px;}
   .streak-box{background:var(--surface-2);border-radius:14px;padding:12px 14px;}
   .streak-box .lbl{font-size:11px;color:var(--text-2);font-weight:600;margin-bottom:4px;}
-  .streak-box .val{font-size:22px;font-weight:800;letter-spacing:-.5px;}
+  .streak-box .val{font-size:22px;font-weight:600;letter-spacing:-.4px;}
   .streak-box .val small{font-size:12px;font-weight:600;color:var(--text-2);margin-left:3px;letter-spacing:0;}
 
   /* ---------- Inputs ---------- */
@@ -347,7 +349,7 @@
   .trade-card:active{transform:scale(.975);}
   .trade-card .tc-top{display:flex;align-items:center;gap:8px;}
   .trade-card .tc-sym{font-weight:800;font-size:16px;letter-spacing:-.3px;}
-  .trade-card .tc-pnl{margin-left:auto;font-weight:800;font-size:18px;letter-spacing:-.4px;}
+  .trade-card .tc-pnl{margin-left:auto;font-weight:600;font-size:18px;letter-spacing:-.3px;}
   .trade-card .tc-meta{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:12px;color:var(--text-2);font-weight:500;}
   .trade-card .tc-meta .dot{width:3px;height:3px;border-radius:50%;background:var(--text-3);}
   .trade-card .tc-note{font-size:12.5px;color:var(--text-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
@@ -403,7 +405,7 @@
     padding:14px 16px;display:flex;gap:26px;flex-wrap:wrap;border:1px solid var(--sep);
   }
   .form-preview .fp-item .fp-lbl{font-size:11px;color:var(--text-3);font-weight:600;}
-  .form-preview .fp-item .fp-val{font-size:20px;font-weight:800;letter-spacing:-.5px;transition:color .3s;}
+  .form-preview .fp-item .fp-val{font-size:20px;font-weight:600;letter-spacing:-.4px;transition:color .3s;}
   .modal-foot{display:flex;justify-content:flex-end;gap:10px;margin-top:22px;}
   .modal-foot .btn-primary,.modal-foot .btn-secondary{padding:11px 20px;font-size:14px;}
 
@@ -421,7 +423,7 @@
   /* ---------- Trade detail modal ---------- */
   .detail-modal{width:780px;}
   .detail-hero{display:flex;align-items:center;gap:14px;margin-bottom:18px;padding:16px 18px;border-radius:18px;background:var(--surface-2);}
-  .detail-hero .dh-pnl{font-size:34px;font-weight:800;letter-spacing:-1.2px;line-height:1;}
+  .detail-hero .dh-pnl{font-size:34px;font-weight:600;letter-spacing:-.9px;line-height:1;}
   .detail-hero .dh-sub{font-size:12.5px;color:var(--text-2);font-weight:500;margin-top:5px;display:flex;gap:6px;align-items:center;flex-wrap:wrap;}
   .detail-hero .dh-badges{margin-left:auto;display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;}
   .detail-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px 16px;margin-bottom:18px;padding-bottom:16px;border-bottom:1px solid var(--sep);}
@@ -515,7 +517,7 @@
   .cal-cell.today .d{background:var(--accent);color:#fff;}
   .cal-cell.selected{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent);}
   .cal-cell .d{font-size:11.5px;color:var(--text-2);font-weight:600;width:22px;height:22px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;}
-  .cal-cell .p{font-size:13px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:-.3px;}
+  .cal-cell .p{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:-.3px;}
   .cal-cell .n{font-size:10px;color:var(--text-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600;}
   .legend{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--text-3);margin-top:14px;flex-wrap:wrap;font-weight:500;}
   .legend .sw{width:12px;height:12px;border-radius:4px;}
@@ -1325,7 +1327,7 @@ function shortDate(dateStr){ const d = new Date(dateStr+'T00:00:00'); return MON
 
 /* ============================= CHART HELPERS ============================= */
 function chartDefaults(){
-  Chart.defaults.font.family = "'Inter', 'Helvetica Neue', Arial, sans-serif";
+  Chart.defaults.font.family = "'Manrope', 'Inter', 'Helvetica Neue', Arial, sans-serif";
   Chart.defaults.font.weight = '500';
   Chart.defaults.color = cssVar('--text-2');
   Chart.defaults.animation.duration = (reducedMotion() || !renderAnimated) ? 0 : 450;
@@ -1549,7 +1551,7 @@ function renderBestMonthCard(trades){
     <div style="display:flex;align-items:center;gap:14px;padding-top:4px;">
       <div style="width:46px;height:46px;border-radius:14px;background:var(--gain-dim);color:var(--gain);display:flex;align-items:center;justify-content:center;flex-shrink:0;">${ICONS.flame.replace('<svg','<svg width="22" height="22" stroke-width="2"')}</div>
       <div style="min-width:0;">
-        <div class="num pos" style="font-size:22px;font-weight:800;letter-spacing:-.5px;">${best.label}</div>
+        <div class="num pos" style="font-size:22px;font-weight:600;letter-spacing:-.4px;">${best.label}</div>
         <div style="font-size:12.5px;color:var(--text-2);margin-top:2px;font-weight:500;">${fmtMoney(best.net,true)} · ${best.count} trade${best.count===1?'':'s'} · ${fmtPct(best.wr)} win rate</div>
       </div>
     </div>`;
@@ -1998,7 +2000,7 @@ function showDayDetail(date, trades){
     <div class="panel" style="margin-top:12px;animation:fadeUp .4s var(--ease) both;">
       <div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:12px;">
         <div><p class="panel-title" style="margin:0;">${prettyDate(date)}</p><p class="panel-note" style="margin:2px 0 0 0;">${trades.length} trade${trades.length===1?'':'s'}</p></div>
-        <div class="num ${colorForPnl(net)}" style="font-size:22px;font-weight:800;letter-spacing:-.5px;">${fmtMoney(net,true)}</div>
+        <div class="num ${colorForPnl(net)}" style="font-size:22px;font-weight:600;letter-spacing:-.4px;">${fmtMoney(net,true)}</div>
       </div>
       <div class="trade-list" style="gap:6px;">${trades.map(tradeCardHtml).join('')}</div>
     </div>`;
