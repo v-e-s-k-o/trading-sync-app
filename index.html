@@ -6,47 +6,155 @@
 <title>Futures Journal</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#F5F2FB" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#07050D" media="(prefers-color-scheme: dark)">
 <link rel="apple-touch-icon" href="icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Journal">
+<script>
+/* Boot theme — apply before first paint to avoid a flash. Default: flagship dark. */
+(function(){
+  try{
+    var s = localStorage.getItem('fj:settings');
+    var t = s ? (JSON.parse(s).theme || 'dark') : 'dark';
+    document.documentElement.setAttribute('data-theme', t==='dark' ? 'dark' : 'light');
+  }catch(e){ document.documentElement.setAttribute('data-theme','dark'); }
+})();
+</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <style>
   /* =====================================================================
      DESIGN TOKENS — iOS Human Interface inspired
      ===================================================================== */
+  /* ---- Every theme token is a registered @property, so the browser interpolates it ----
+     (gradients, shadows and calendar tints included). Nothing re-renders on a theme change. */
+  @property --bg{syntax:'<color>';inherits:true;initial-value:#f5f2fb;}
+  @property --surface{syntax:'<color>';inherits:true;initial-value:#ffffff;}
+  @property --surface-2{syntax:'<color>';inherits:true;initial-value:#f1edf9;}
+  @property --surface-3{syntax:'<color>';inherits:true;initial-value:#e8e2f5;}
+  @property --fill{syntax:'<color>';inherits:true;initial-value:rgba(124,58,237,.07);}
+  @property --fill-2{syntax:'<color>';inherits:true;initial-value:rgba(124,58,237,.13);}
+  @property --sep{syntax:'<color>';inherits:true;initial-value:rgba(88,68,160,.13);}
+  @property --sep-strong{syntax:'<color>';inherits:true;initial-value:rgba(88,68,160,.26);}
+  @property --text{syntax:'<color>';inherits:true;initial-value:#191327;}
+  @property --text-2{syntax:'<color>';inherits:true;initial-value:rgba(58,47,92,.64);}
+  @property --text-3{syntax:'<color>';inherits:true;initial-value:rgba(58,47,92,.40);}
+  @property --accent{syntax:'<color>';inherits:true;initial-value:#7c3aed;}
+  @property --accent-2{syntax:'<color>';inherits:true;initial-value:#9d7bff;}
+  @property --accent-deep{syntax:'<color>';inherits:true;initial-value:#5b21b6;}
+  @property --accent-dim{syntax:'<color>';inherits:true;initial-value:rgba(124,58,237,.12);}
+  @property --gain{syntax:'<color>';inherits:true;initial-value:#0fa968;}
+  @property --gain-dim{syntax:'<color>';inherits:true;initial-value:rgba(15,169,104,.13);}
+  @property --loss{syntax:'<color>';inherits:true;initial-value:#e5344b;}
+  @property --loss-dim{syntax:'<color>';inherits:true;initial-value:rgba(229,52,75,.12);}
+  @property --orange{syntax:'<color>';inherits:true;initial-value:#e8890c;}
+  @property --purple{syntax:'<color>';inherits:true;initial-value:#8b5cf6;}
+  @property --glass{syntax:'<color>';inherits:true;initial-value:rgba(255,255,255,.72);}
+  @property --glass-strong{syntax:'<color>';inherits:true;initial-value:rgba(255,255,255,.88);}
+  @property --glow-a{syntax:'<color>';inherits:true;initial-value:rgba(167,139,250,.20);}
+  @property --glow-b{syntax:'<color>';inherits:true;initial-value:rgba(139,92,246,.13);}
+  @property --ray{syntax:'<color>';inherits:true;initial-value:rgba(124,58,237,.045);}
+  @property --card-glow{syntax:'<color>';inherits:true;initial-value:rgba(124,58,237,.07);}
+  @property --panel-tint{syntax:'<color>';inherits:true;initial-value:rgba(124,58,237,.035);}
+  @property --edge{syntax:'<color>';inherits:true;initial-value:rgba(255,255,255,.9);}
+  @property --input-bg{syntax:'<color>';inherits:true;initial-value:#f6f3fd;}
+  @property --input-border{syntax:'<color>';inherits:true;initial-value:rgba(88,68,160,.30);}
+  @property --seg-pill-a{syntax:'<color>';inherits:true;initial-value:#ffffff;}
+  @property --seg-pill-b{syntax:'<color>';inherits:true;initial-value:#f8f5fe;}
+  @property --seg-pill-ring{syntax:'<color>';inherits:true;initial-value:rgba(124,58,237,.24);}
+  @property --glow-core{syntax:'<color>';inherits:true;initial-value:rgba(124,58,237,.075);}
+  @property --glow-mid{syntax:'<color>';inherits:true;initial-value:rgba(124,58,237,.035);}
+  @property --x-base{syntax:'<color>';inherits:true;initial-value:rgba(124,58,237,.055);}
+  @property --x-lit{syntax:'<color>';inherits:true;initial-value:rgba(124,58,237,.5);}
+  @property --cal-win-a{syntax:'<color>';inherits:true;initial-value:#eefaf3;}
+  @property --cal-win-b{syntax:'<color>';inherits:true;initial-value:#a5e8c6;}
+  @property --cal-win-border{syntax:'<color>';inherits:true;initial-value:rgba(15,169,104,.4);}
+  @property --cal-loss-a{syntax:'<color>';inherits:true;initial-value:#fdeef1;}
+  @property --cal-loss-b{syntax:'<color>';inherits:true;initial-value:#f3b8c3;}
+  @property --cal-loss-border{syntax:'<color>';inherits:true;initial-value:rgba(229,52,75,.4);}
+  @property --overlay-bg{syntax:'<color>';inherits:true;initial-value:rgba(4,2,10,.44);}
+  @property --rank-gold-text{syntax:'<color>';inherits:true;initial-value:#b8860b;}
+  @property --sh1-a{syntax:'<color>';inherits:true;initial-value:rgba(25,19,39,.04);}
+  @property --sh1-b{syntax:'<color>';inherits:true;initial-value:rgba(25,19,39,.06);}
+  @property --sh1-blur{syntax:'<length>';inherits:true;initial-value:10px;}
+  @property --sh2-a{syntax:'<color>';inherits:true;initial-value:rgba(25,19,39,.12);}
+  @property --sh2-b{syntax:'<color>';inherits:true;initial-value:rgba(25,19,39,.05);}
+  @property --sh2-y{syntax:'<length>';inherits:true;initial-value:10px;}
+  @property --sh2-blur{syntax:'<length>';inherits:true;initial-value:32px;}
+  @property --sh2b-blur{syntax:'<length>';inherits:true;initial-value:6px;}
+  @property --sh3-a{syntax:'<color>';inherits:true;initial-value:rgba(25,19,39,.24);}
+  @property --sh3-y{syntax:'<length>';inherits:true;initial-value:24px;}
+  @property --sh3-blur{syntax:'<length>';inherits:true;initial-value:70px;}
+  @property --in-a{syntax:'<color>';inherits:true;initial-value:rgba(0,0,0,0);}
+  @property --in-b{syntax:'<color>';inherits:true;initial-value:rgba(25,19,39,.07);}
+  @property --in-blur{syntax:'<length>';inherits:true;initial-value:3px;}
+
   :root{
-    --bg:#f2f2f7;
+    color-scheme:light;
+    /* Light variant — soft lavender-white expression of the purple-black system */
+    --bg:#f5f2fb;
     --surface:#ffffff;
-    --surface-2:#f2f2f7;
-    --surface-3:#e5e5ea;
-    --fill:rgba(120,120,128,.10);
-    --fill-2:rgba(120,120,128,.18);
-    --sep:rgba(60,60,67,.10);
-    --sep-strong:rgba(60,60,67,.22);
-    --text:#000000;
-    --text-2:rgba(60,60,67,.62);
-    --text-3:rgba(60,60,67,.36);
-    --accent:#007aff;
-    --accent-2:#5ac8fa;
-    --accent-dim:rgba(0,122,255,.12);
-    --gain:#34c759;
-    --gain-dim:rgba(52,199,89,.14);
-    --loss:#ff3b30;
-    --loss-dim:rgba(255,59,48,.14);
-    --orange:#ff9500;
-    --purple:#af52de;
-    --glass:rgba(255,255,255,.70);
-    --glass-strong:rgba(255,255,255,.86);
-    --shadow-1:0 1px 1px rgba(0,0,0,.03), 0 2px 10px rgba(0,0,0,.05);
-    --shadow-2:0 10px 32px rgba(0,0,0,.10), 0 2px 6px rgba(0,0,0,.04);
-    --shadow-3:0 24px 70px rgba(0,0,0,.22);
+    --surface-2:#f1edf9;
+    --surface-3:#e8e2f5;
+    --fill:rgba(124,58,237,.07);
+    --fill-2:rgba(124,58,237,.13);
+    --sep:rgba(88,68,160,.13);
+    --sep-strong:rgba(88,68,160,.26);
+    --text:#191327;
+    --text-2:rgba(58,47,92,.64);
+    --text-3:rgba(58,47,92,.40);
+    --accent:#7c3aed;
+    --accent-2:#9d7bff;
+    --accent-deep:#5b21b6;
+    --accent-dim:rgba(124,58,237,.12);
+    --gain:#0fa968;
+    --gain-dim:rgba(15,169,104,.13);
+    --loss:#e5344b;
+    --loss-dim:rgba(229,52,75,.12);
+    --orange:#e8890c;
+    --purple:#8b5cf6;
+    --glass:rgba(255,255,255,.72);
+    --glass-strong:rgba(255,255,255,.88);
+    /* purple ambient system */
+    --glow-a:rgba(167,139,250,.20);
+    --glow-b:rgba(139,92,246,.13);
+    --ray:rgba(124,58,237,.045);
+    --card-glow:rgba(124,58,237,.07);
+    --panel-tint:rgba(124,58,237,.035);
+    --edge:rgba(255,255,255,.9);
+    /* form-field / control surfaces — clearly visible on cards & modals */
+    --input-bg:#f6f3fd;
+    --input-border:rgba(88,68,160,.30);
+    --seg-pill-a:#ffffff; --seg-pill-b:#f8f5fe;
+    --seg-pill-ring:rgba(124,58,237,.24);
+    /* cursor spotlight */
+    --glow-core:rgba(124,58,237,.075);
+    --glow-mid:rgba(124,58,237,.035);
+    /* X-mark colours (drawn on the #bg-x canvas) */
+    --x-base:rgba(124,58,237,.055);
+    --x-lit:rgba(124,58,237,.5);
+    /* calendar day tints (were inline JS colours) */
+    --cal-win-a:#eefaf3; --cal-win-b:#a5e8c6; --cal-win-border:rgba(15,169,104,.4);
+    --cal-loss-a:#fdeef1; --cal-loss-b:#f3b8c3; --cal-loss-border:rgba(229,52,75,.4);
+    --overlay-bg:rgba(4,2,10,.44);
+    --rank-gold-text:#b8860b;
+    /* shadow parts (split so the colours + blurs can interpolate during a theme change) */
+    --sh1-a:rgba(25,19,39,.04); --sh1-b:rgba(25,19,39,.06); --sh1-blur:10px;
+    --sh2-a:rgba(25,19,39,.12); --sh2-b:rgba(25,19,39,.05); --sh2-y:10px; --sh2-blur:32px; --sh2b-blur:6px;
+    --sh3-a:rgba(25,19,39,.24); --sh3-y:24px; --sh3-blur:70px;
+    --in-a:rgba(0,0,0,0); --in-b:rgba(25,19,39,.07); --in-blur:3px;
+    /* shadow recipes (geometry shared, parts above are per-theme) */
+    --shadow-1:0 1px 1px var(--sh1-a), 0 2px var(--sh1-blur) var(--sh1-b);
+    --shadow-2:0 var(--sh2-y) var(--sh2-blur) var(--sh2-a), 0 2px var(--sh2b-blur) var(--sh2-b);
+    --shadow-3:0 var(--sh3-y) var(--sh3-blur) var(--sh3-a);
+    --input-shadow:inset 0 1px 6px var(--in-a), 0 1px var(--in-blur) var(--in-b);
+    --glow-r:400px;            /* cursor spotlight radius — tweak this to taste */
+    --x-radius:250px;          /* how far from the cursor the X marks react */
     --r-s:10px; --r-m:16px; --r-l:22px; --r-xl:28px;
     --spring:cubic-bezier(.34,1.56,.64,1);
     --ease:cubic-bezier(.22,1,.36,1);
@@ -60,41 +168,130 @@
     --shadow-card:var(--shadow-1);
   }
   html[data-theme="dark"]{
-    --bg:#000000;
-    --surface:#1c1c1e;
-    --surface-2:#2c2c2e;
-    --surface-3:#3a3a3c;
-    --fill:rgba(120,120,128,.20);
-    --fill-2:rgba(120,120,128,.32);
-    --sep:rgba(84,84,88,.42);
-    --sep-strong:rgba(84,84,88,.65);
-    --text:#ffffff;
-    --text-2:rgba(235,235,245,.62);
-    --text-3:rgba(235,235,245,.34);
-    --accent:#0a84ff;
-    --accent-2:#64d2ff;
-    --accent-dim:rgba(10,132,255,.20);
-    --gain:#30d158;
-    --gain-dim:rgba(48,209,88,.18);
-    --loss:#ff453a;
-    --loss-dim:rgba(255,69,58,.18);
-    --orange:#ff9f0a;
-    --purple:#bf5af2;
-    --glass:rgba(22,22,24,.66);
-    --glass-strong:rgba(28,28,30,.84);
-    --shadow-1:0 1px 1px rgba(0,0,0,.25), 0 2px 12px rgba(0,0,0,.30);
-    --shadow-2:0 12px 36px rgba(0,0,0,.50), 0 2px 6px rgba(0,0,0,.30);
-    --shadow-3:0 30px 80px rgba(0,0,0,.70);
+    color-scheme:dark;
+    /* Flagship — deep purple-black trading terminal */
+    --bg:#07050d;
+    --surface:#0e0a18;
+    --surface-2:#141020;
+    --surface-3:#1a1428;
+    --fill:rgba(139,92,246,.09);
+    --fill-2:rgba(139,92,246,.16);
+    --sep:rgba(139,92,246,.13);
+    --sep-strong:rgba(139,92,246,.30);
+    --text:#f3f0fa;
+    --text-2:rgba(199,189,234,.66);
+    --text-3:rgba(199,189,234,.38);
+    --accent:#8b5cf6;
+    --accent-2:#a78bfa;
+    --accent-deep:#5b21b6;
+    --accent-dim:rgba(139,92,246,.17);
+    --gain:#34d399;
+    --gain-dim:rgba(52,211,153,.15);
+    --loss:#ff4d6d;
+    --loss-dim:rgba(255,77,109,.14);
+    --orange:#ffb020;
+    --purple:#a78bfa;
+    --glass:rgba(13,9,23,.64);
+    --glass-strong:rgba(15,10,26,.86);
+    /* purple ambient system */
+    --glow-a:rgba(91,33,182,.30);
+    --glow-b:rgba(67,24,143,.22);
+    --ray:rgba(139,92,246,.055);
+    --card-glow:rgba(124,58,237,.13);
+    --panel-tint:rgba(139,92,246,.05);
+    --edge:rgba(167,139,250,.14);
+    /* form-field / control surfaces — clearly visible on cards & modals */
+    --input-bg:#241c44;
+    --input-border:rgba(167,139,250,.40);
+    --seg-pill-a:#2f2455; --seg-pill-b:#221a44;
+    --seg-pill-ring:rgba(167,139,250,.42);
+    /* cursor spotlight */
+    --glow-core:rgba(167,139,250,.21);
+    --glow-mid:rgba(139,92,246,.09);
+  
+    --x-base:rgba(167,139,250,.09);
+    --x-lit:rgba(196,181,253,.85);
+    --cal-win-a:#0d1f17; --cal-win-b:#14503a; --cal-win-border:rgba(52,211,153,.45);
+    --cal-loss-a:#2a1016; --cal-loss-b:#6e1f36; --cal-loss-border:rgba(255,77,109,.45);
+    --overlay-bg:rgba(3,1,8,.62);
+    --rank-gold-text:#ffd60a;
+    --sh1-a:rgba(0,0,0,.40); --sh1-b:rgba(4,2,10,.35); --sh1-blur:14px;
+    --sh2-a:rgba(4,2,10,.55); --sh2-b:rgba(4,2,10,.35); --sh2-y:14px; --sh2-blur:40px; --sh2b-blur:8px;
+    --sh3-a:rgba(3,1,8,.75); --sh3-y:30px; --sh3-blur:90px;
+    --in-a:rgba(0,0,0,.35); --in-b:rgba(4,2,10,.25); --in-blur:2px;
   }
 
   /* =====================================================================
      BASE
      ===================================================================== */
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-  html{background:var(--bg);-webkit-text-size-adjust:100%;}
+  html{background:var(--bg);-webkit-text-size-adjust:100%;
+    transition:--bg .6s cubic-bezier(.4,0,.2,1),
+      --surface .6s cubic-bezier(.4,0,.2,1),
+      --surface-2 .6s cubic-bezier(.4,0,.2,1),
+      --surface-3 .6s cubic-bezier(.4,0,.2,1),
+      --fill .6s cubic-bezier(.4,0,.2,1),
+      --fill-2 .6s cubic-bezier(.4,0,.2,1),
+      --sep .6s cubic-bezier(.4,0,.2,1),
+      --sep-strong .6s cubic-bezier(.4,0,.2,1),
+      --text .6s cubic-bezier(.4,0,.2,1),
+      --text-2 .6s cubic-bezier(.4,0,.2,1),
+      --text-3 .6s cubic-bezier(.4,0,.2,1),
+      --accent .6s cubic-bezier(.4,0,.2,1),
+      --accent-2 .6s cubic-bezier(.4,0,.2,1),
+      --accent-deep .6s cubic-bezier(.4,0,.2,1),
+      --accent-dim .6s cubic-bezier(.4,0,.2,1),
+      --gain .6s cubic-bezier(.4,0,.2,1),
+      --gain-dim .6s cubic-bezier(.4,0,.2,1),
+      --loss .6s cubic-bezier(.4,0,.2,1),
+      --loss-dim .6s cubic-bezier(.4,0,.2,1),
+      --orange .6s cubic-bezier(.4,0,.2,1),
+      --purple .6s cubic-bezier(.4,0,.2,1),
+      --glass .6s cubic-bezier(.4,0,.2,1),
+      --glass-strong .6s cubic-bezier(.4,0,.2,1),
+      --glow-a .6s cubic-bezier(.4,0,.2,1),
+      --glow-b .6s cubic-bezier(.4,0,.2,1),
+      --ray .6s cubic-bezier(.4,0,.2,1),
+      --card-glow .6s cubic-bezier(.4,0,.2,1),
+      --panel-tint .6s cubic-bezier(.4,0,.2,1),
+      --edge .6s cubic-bezier(.4,0,.2,1),
+      --input-bg .6s cubic-bezier(.4,0,.2,1),
+      --input-border .6s cubic-bezier(.4,0,.2,1),
+      --seg-pill-a .6s cubic-bezier(.4,0,.2,1),
+      --seg-pill-b .6s cubic-bezier(.4,0,.2,1),
+      --seg-pill-ring .6s cubic-bezier(.4,0,.2,1),
+      --glow-core .6s cubic-bezier(.4,0,.2,1),
+      --glow-mid .6s cubic-bezier(.4,0,.2,1),
+      --x-base .6s cubic-bezier(.4,0,.2,1),
+      --x-lit .6s cubic-bezier(.4,0,.2,1),
+      --cal-win-a .6s cubic-bezier(.4,0,.2,1),
+      --cal-win-b .6s cubic-bezier(.4,0,.2,1),
+      --cal-win-border .6s cubic-bezier(.4,0,.2,1),
+      --cal-loss-a .6s cubic-bezier(.4,0,.2,1),
+      --cal-loss-b .6s cubic-bezier(.4,0,.2,1),
+      --cal-loss-border .6s cubic-bezier(.4,0,.2,1),
+      --overlay-bg .6s cubic-bezier(.4,0,.2,1),
+      --rank-gold-text .6s cubic-bezier(.4,0,.2,1),
+      --sh1-a .6s cubic-bezier(.4,0,.2,1),
+      --sh1-b .6s cubic-bezier(.4,0,.2,1),
+      --sh1-blur .6s cubic-bezier(.4,0,.2,1),
+      --sh2-a .6s cubic-bezier(.4,0,.2,1),
+      --sh2-b .6s cubic-bezier(.4,0,.2,1),
+      --sh2-y .6s cubic-bezier(.4,0,.2,1),
+      --sh2-blur .6s cubic-bezier(.4,0,.2,1),
+      --sh2b-blur .6s cubic-bezier(.4,0,.2,1),
+      --sh3-a .6s cubic-bezier(.4,0,.2,1),
+      --sh3-y .6s cubic-bezier(.4,0,.2,1),
+      --sh3-blur .6s cubic-bezier(.4,0,.2,1),
+      --in-a .6s cubic-bezier(.4,0,.2,1),
+      --in-b .6s cubic-bezier(.4,0,.2,1),
+      --in-blur .6s cubic-bezier(.4,0,.2,1);}
+  /* While the theme fades, per-element colour transitions are paused so every element follows the
+     single token timeline (otherwise each would lag a different amount). The switch knob keeps its slide. */
+  html.theme-switching *:not(.switch),html.theme-switching *:not(.switch)::before,html.theme-switching *:not(.switch)::after{transition:none !important;}
   html,body{margin:0;padding:0;}
   body{
-    background:var(--bg);color:var(--text);
+    background:transparent;color:var(--text);
     font-family:'Inter',sans-serif;
     font-size:14px;line-height:1.45;
     letter-spacing:-.01em;
@@ -102,13 +299,34 @@
     text-rendering:optimizeLegibility;
     touch-action:manipulation;
     overscroll-behavior-y:none;
-    transition:background-color .35s var(--ease), color .35s var(--ease);
   }
   body.modal-open{overflow:hidden;}
+  /* ---- Cursor spotlight: violet halo that follows the pointer ---- */
+  #cursor-glow{
+    position:fixed;top:0;left:0;width:100vw;height:100vh;margin:0;padding:0;
+    pointer-events:none;z-index:-1;
+    background:radial-gradient(var(--glow-r) circle at var(--mx,-600px) var(--my,-600px), var(--glow-core), var(--glow-mid) 38%, transparent 67%);
+    opacity:0;transition:opacity .5s var(--ease);
+  }
+  body.cursor-lit #cursor-glow{opacity:1;}
+  @media (hover:none){ #cursor-glow{display:none;} }
+  /* Ambient purple-black stage (viewport-anchored): corner glows + diagonal light ray */
+  body::before{
+    content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;
+    background-image:
+      radial-gradient(1100px 720px at 82% -8%, var(--glow-a), transparent 62%),
+      radial-gradient(900px 640px at -10% 108%, var(--glow-b), transparent 62%),
+      linear-gradient(118deg, transparent 44%, var(--ray) 50%, transparent 56%);
+    background-repeat:no-repeat;
+  }
+  /* X-mark grid: drawn on a canvas so each mark can spin / grow as the cursor passes */
+  #bg-x{position:fixed;inset:0;width:100%;height:100%;z-index:-1;pointer-events:none;}
   ::selection{background:var(--accent-dim);color:var(--accent);}
-  /* Numeric / money values: Manrope has a plain "1" (no bottom serif) and a lighter feel than Inter's ss01 digits */
-  .num{font-family:'Manrope','Inter',sans-serif;font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1;font-weight:600;letter-spacing:-.01em;}
-  .num[style*="font-weight"]{font-weight:600 !important;}
+  /* Numeric / money values: plain Inter (same as the rest of the UI). "ss01" was removed — it swapped in the alternate "1" with the serif foot. */
+  /* Money / numeric values: same plain Inter used by the trade-log form inputs (standard digits, no ss01 alternate "1"), one step bolder than the inputs (500 vs 400). */
+  .num{font-family:'Inter',sans-serif;font-variant-numeric:normal;font-feature-settings:normal;font-weight:700;letter-spacing:-.01em;}
+  .num[style*="font-weight"]{font-weight:700 !important;}
+  #app{transition:opacity .3s var(--ease);}
   a{color:inherit;}
   button{font-family:inherit;color:inherit;}
   button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
@@ -116,7 +334,6 @@
   ::-webkit-scrollbar-track{background:transparent;}
   ::-webkit-scrollbar-thumb{background:var(--fill-2);border-radius:8px;}
   ::-webkit-scrollbar-thumb:hover{background:var(--sep-strong);}
-  ::view-transition-old(root),::view-transition-new(root){animation:none;mix-blend-mode:normal;}
   @media (prefers-reduced-motion: reduce){
     *,*::before,*::after{animation-duration:.001ms !important;animation-iteration-count:1 !important;transition-duration:.001ms !important;}
   }
@@ -128,9 +345,9 @@
   /* =====================================================================
      SPLASH
      ===================================================================== */
-  .splash{position:fixed;inset:0;z-index:1000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;background:var(--bg);transition:opacity .45s var(--ease), visibility .45s;}
+  .splash{position:fixed;inset:0;z-index:1000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;background:transparent;transition:opacity .45s var(--ease), visibility .45s;}
   .splash.hidden{opacity:0;visibility:hidden;pointer-events:none;}
-  .splash-logo{width:84px;height:84px;border-radius:22px;animation:splashIn .6s var(--spring) both;box-shadow:0 18px 40px rgba(0,122,255,.30);}
+  .splash-logo{width:84px;height:84px;border-radius:22px;animation:splashIn .6s var(--spring) both;box-shadow:0 18px 44px rgba(124,58,237,.38), 0 0 0 1px var(--edge);}
   .splash-title{font-size:17px;font-weight:600;letter-spacing:-.2px;animation:fadeUp .5s .15s var(--ease) both;}
   .splash-sub{font-size:12.5px;color:var(--text-3);animation:fadeUp .5s .25s var(--ease) both;}
   .spinner{width:22px;height:22px;border-radius:50%;border:2.5px solid var(--fill-2);border-top-color:var(--accent);animation:spin .8s linear infinite;}
@@ -149,17 +366,17 @@
   .sidebar{
     width:248px;flex-shrink:0;position:sticky;top:0;height:100vh;height:100dvh;
     display:flex;flex-direction:column;padding:26px 14px 18px 14px;
-    background:var(--glass);backdrop-filter:blur(28px) saturate(180%);-webkit-backdrop-filter:blur(28px) saturate(180%);
+    background-color:var(--glass);background-image:linear-gradient(180deg,var(--panel-tint),transparent 32%);backdrop-filter:blur(28px) saturate(180%);-webkit-backdrop-filter:blur(28px) saturate(180%);
     border-right:1px solid var(--sep);z-index:5;
     transition:background-color .35s var(--ease), border-color .35s var(--ease);
   }
   .brand{display:flex;align-items:center;gap:11px;padding:2px 10px 22px 10px;}
-  .brand-icon{width:34px;height:34px;border-radius:10px;box-shadow:0 4px 12px rgba(0,122,255,.28);flex-shrink:0;transition:transform .4s var(--spring);}
+  .brand-icon{width:34px;height:34px;border-radius:10px;box-shadow:0 4px 14px rgba(124,58,237,.35), 0 0 0 1px var(--edge);flex-shrink:0;transition:transform .4s var(--spring);}
   .brand:hover .brand-icon{transform:rotate(-6deg) scale(1.06);}
   .brand-mark{font-weight:700;font-size:16px;letter-spacing:-.3px;line-height:1.1;}
   .brand-sub{font-size:11px;color:var(--text-3);font-weight:500;margin-top:2px;}
   .nav{display:flex;flex-direction:column;gap:2px;position:relative;}
-  .nav-indicator{position:absolute;left:0;top:0;width:100%;height:40px;border-radius:12px;background:var(--accent-dim);pointer-events:none;transition:transform .45s var(--spring), height .3s var(--ease), opacity .2s;z-index:0;}
+  .nav-indicator{position:absolute;left:0;top:0;width:100%;height:40px;border-radius:12px;background:linear-gradient(90deg,var(--accent-dim),var(--panel-tint));box-shadow:0 0 28px var(--accent-dim), inset 0 0 0 1px var(--edge);pointer-events:none;transition:transform .45s var(--spring), height .3s var(--ease), opacity .2s;z-index:0;}
   .nav-item{
     position:relative;z-index:1;display:flex;align-items:center;gap:12px;height:40px;padding:0 12px;border-radius:12px;
     color:var(--text-2);cursor:pointer;font-size:14px;font-weight:500;user-select:none;
@@ -168,7 +385,7 @@
   .nav-item svg{width:19px;height:19px;flex-shrink:0;stroke-width:1.9;transition:transform .35s var(--spring);}
   .nav-item:hover{color:var(--text);background:var(--fill);}
   .nav-item:active{transform:scale(.97);}
-  .nav-item.active{color:var(--accent);background:transparent;}
+  .nav-item.active{color:var(--accent);background:transparent;text-shadow:0 0 24px var(--accent-dim);}
   .nav-item.active svg{transform:scale(1.08);}
   .nav-item .kbd{margin-left:auto;opacity:0;transition:opacity .2s;}
   .nav-item:hover .kbd{opacity:1;}
@@ -210,7 +427,7 @@
   .section-title{font-size:13px;font-weight:600;color:var(--text-2);text-transform:uppercase;letter-spacing:.06em;margin:22px 0 10px 4px;}
 
   /* ---------- Segmented control (sliding pill) ---------- */
-  .segmented{position:relative;display:inline-flex;background:var(--fill);border-radius:11px;padding:2.5px;gap:0;isolation:isolate;}
+  .segmented{position:relative;display:inline-flex;background:var(--fill);border:1px solid var(--sep);border-radius:11px;padding:2.5px;gap:0;isolation:isolate;}
   .segmented button{
     position:relative;z-index:1;background:transparent;border:none;color:var(--text-2);
     padding:6px 13px;border-radius:9px;font-size:12.5px;font-weight:600;cursor:pointer;white-space:nowrap;
@@ -218,8 +435,8 @@
   }
   .segmented button:active{transform:scale(.95);}
   .segmented button.active{color:var(--text);}
-  .seg-pill{position:absolute;top:2.5px;bottom:2.5px;left:0;width:0;border-radius:9px;background:var(--surface);box-shadow:0 2px 6px rgba(0,0,0,.10),0 0 0 .5px rgba(0,0,0,.04);transition:transform .4s var(--spring), width .3s var(--ease), opacity .2s;z-index:0;}
-  html[data-theme="dark"] .seg-pill{background:var(--surface-3);}
+  .seg-pill{position:absolute;top:2.5px;bottom:2.5px;left:0;width:0;border-radius:9px;background:linear-gradient(180deg,var(--seg-pill-a),var(--seg-pill-b));box-shadow:0 2px 8px rgba(4,2,10,.35), 0 0 0 1px var(--seg-pill-ring), inset 0 1px 0 var(--edge);transition:transform .4s var(--spring), width .3s var(--ease), opacity .2s;z-index:0;}
+  html[data-theme="dark"] .seg-pill{background:linear-gradient(180deg,var(--seg-pill-a),var(--seg-pill-b));}
 
   /* ---------- Buttons ---------- */
   .btn-primary,.btn-secondary,.btn-ghost{
@@ -227,10 +444,10 @@
     border-radius:999px;font-weight:600;cursor:pointer;white-space:nowrap;
     transition:transform .25s var(--spring), filter .2s, background-color .2s, border-color .2s, color .2s, box-shadow .25s;
   }
-  .btn-primary{background:var(--accent);color:#fff;border:none;padding:10px 18px;font-size:13.5px;box-shadow:0 6px 16px rgba(0,122,255,.25);}
-  .btn-primary:hover{filter:brightness(1.07);box-shadow:0 8px 22px rgba(0,122,255,.32);}
-  .btn-primary:active{transform:scale(.94);box-shadow:0 2px 8px rgba(0,122,255,.2);}
-  .btn-secondary{background:var(--fill);color:var(--accent);border:none;padding:9px 16px;font-size:13.5px;}
+  .btn-primary{background:linear-gradient(180deg,var(--accent-2),var(--accent) 55%,var(--accent-deep));color:#fff;border:none;padding:10px 18px;font-size:13.5px;box-shadow:0 6px 18px rgba(109,60,225,.38), inset 0 1px 0 rgba(255,255,255,.22);}
+  .btn-primary:hover{filter:brightness(1.07);box-shadow:0 8px 24px rgba(109,60,225,.46), inset 0 1px 0 rgba(255,255,255,.22);}
+  .btn-primary:active{transform:scale(.94);box-shadow:0 2px 10px rgba(109,60,225,.34);}
+  .btn-secondary{background:var(--fill);color:var(--accent);border:1px solid var(--input-border);padding:9px 16px;font-size:13.5px;}
   .btn-secondary:hover{background:var(--fill-2);}
   .btn-secondary:active{transform:scale(.94);}
   .btn-ghost{background:transparent;border:1px solid var(--sep-strong);color:var(--text-2);padding:8px 13px;font-size:12.5px;}
@@ -244,25 +461,28 @@
 
   /* ---------- Cards / KPI ---------- */
   .kpi-row{display:grid;grid-template-columns:1.4fr repeat(4,1fr);gap:12px;margin-bottom:12px;}
+  /* Layered purple-black card system — gradient surfaces + thin luminous edges */
   .card,.panel,.kpi-card,.kpi-hero{
-    background:var(--surface);border-radius:var(--r-l);box-shadow:var(--shadow-1);
+    background-image:radial-gradient(120% 140% at 50% -20%, var(--card-glow), transparent 55%), linear-gradient(180deg, var(--surface-2), var(--surface));
+    background-color:var(--surface);border-radius:var(--r-l);
+    box-shadow:var(--shadow-1), inset 0 1px 0 var(--edge);
     transition:background-color .35s var(--ease), box-shadow .3s var(--ease), transform .35s var(--spring), border-color .3s;
-    border:1px solid transparent;
+    border:1px solid var(--sep);
   }
-  html[data-theme="dark"] .card,html[data-theme="dark"] .panel,html[data-theme="dark"] .kpi-card,html[data-theme="dark"] .kpi-hero{border-color:var(--sep);}
   .kpi-hero{padding:22px 26px;display:flex;flex-direction:column;justify-content:center;gap:6px;position:relative;overflow:hidden;}
-  .kpi-hero::before{content:'';position:absolute;inset:-40% -20% auto auto;width:60%;height:160%;background:radial-gradient(closest-side, var(--accent-dim), transparent 70%);opacity:.7;pointer-events:none;}
+  .kpi-hero::before{content:'';position:absolute;inset:-40% -20% auto auto;width:60%;height:160%;background:radial-gradient(closest-side, var(--accent-dim), transparent 70%);opacity:.85;pointer-events:none;}
+  .kpi-hero::after{content:'';position:absolute;top:0;left:12%;right:12%;height:1px;background:linear-gradient(90deg,transparent,var(--edge) 50%,transparent);pointer-events:none;}
   .kpi-hero .lbl{font-size:12.5px;color:var(--text-2);font-weight:600;}
-  .kpi-hero .val{font-size:40px;font-weight:600;line-height:1;letter-spacing:-1px;}
+  .kpi-hero .val{font-size:40px;font-weight:700;line-height:1;letter-spacing:-1.2px;}
   .kpi-hero .sub{font-size:12.5px;color:var(--text-3);margin-top:2px;font-weight:500;}
   .kpi-card{padding:16px 18px;display:flex;flex-direction:column;justify-content:center;gap:5px;min-width:0;}
   .kpi-card .lbl{font-size:12px;color:var(--text-2);font-weight:600;}
-  .kpi-card .val{font-size:22px;font-weight:600;letter-spacing:-.4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .kpi-card .val{font-size:22px;font-weight:700;letter-spacing:-.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .kpi-card .sub{font-size:11.5px;color:var(--text-3);font-weight:500;}
   .cat-card{cursor:pointer;position:relative;}
   .cat-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-2);}
   .cat-card:active{transform:translateY(0) scale(.98);}
-  .cat-card.active{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent), var(--shadow-2);}
+  .cat-card.active{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent), 0 0 34px var(--accent-dim), var(--shadow-2);}
   .cat-card.active::after{content:'';position:absolute;top:14px;right:14px;width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 3px var(--accent-dim);animation:popIn .4s var(--spring);}
   .cat-card .tag{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-3);}
   @keyframes popIn{from{transform:scale(0);}to{transform:scale(1);}}
@@ -277,20 +497,22 @@
   .chart-wrap{position:relative;width:100%;}
   .chart-wrap canvas{max-width:100%;}
   .streak-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding-top:4px;}
-  .streak-box{background:var(--surface-2);border-radius:14px;padding:12px 14px;}
+  .streak-box{background:var(--surface-2);border-radius:14px;padding:12px 14px;border:1px solid var(--sep);}
   .streak-box .lbl{font-size:11px;color:var(--text-2);font-weight:600;margin-bottom:4px;}
-  .streak-box .val{font-size:22px;font-weight:600;letter-spacing:-.4px;}
+  .streak-box .val{font-size:22px;font-weight:700;letter-spacing:-.5px;}
   .streak-box .val small{font-size:12px;font-weight:600;color:var(--text-2);margin-left:3px;letter-spacing:0;}
 
   /* ---------- Inputs ---------- */
   input[type=text],input[type=search],input[type=email],input[type=password],select,input[type=number],input[type=date],input[type=time],textarea{
-    background:var(--surface-2);border:1px solid transparent;color:var(--text);
+    background:var(--input-bg);border:1px solid var(--input-border);color:var(--text);
     padding:9px 12px;border-radius:12px;font-size:13.5px;font-family:inherit;outline:none;
+    box-shadow:var(--input-shadow);
     transition:border-color .2s, box-shadow .2s, background-color .25s;
     -webkit-appearance:none;appearance:none;min-height:38px;
   }
-  html[data-theme="dark"] input,html[data-theme="dark"] select,html[data-theme="dark"] textarea{background:var(--surface-2);}
-  input:focus,select:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 0 4px var(--accent-dim);background:var(--surface);}
+  html[data-theme="dark"] input,html[data-theme="dark"] select,html[data-theme="dark"] textarea{background:var(--input-bg);}
+  input:focus,select:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 0 4px var(--accent-dim), var(--input-shadow);background:var(--input-bg);}
+  input:hover,select:hover,textarea:hover{border-color:var(--sep-strong);}
   select{padding-right:32px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238e8e93' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 11px center;cursor:pointer;}
   input[type=search]{padding-left:34px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='15' height='15' viewBox='0 0 24 24' fill='none' stroke='%238e8e93' stroke-width='2.2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='M20 20l-3.5-3.5'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:11px center;}
   input[type=search]::-webkit-search-cancel-button{-webkit-appearance:none;}
@@ -304,7 +526,7 @@
   thead th{
     text-align:left;color:var(--text-3);font-weight:600;font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;
     padding:11px 12px;border-bottom:1px solid var(--sep);position:sticky;top:0;z-index:2;
-    background:var(--glass-strong);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+    background:var(--glass-strong);background-image:linear-gradient(180deg,var(--panel-tint),transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
     cursor:pointer;user-select:none;white-space:nowrap;transition:color .15s;
   }
   thead th:hover{color:var(--text);}
@@ -344,34 +566,33 @@
 
   /* ---------- Trade cards (mobile list) ---------- */
   .trade-list{display:flex;flex-direction:column;gap:10px;}
-  .trade-card{background:var(--surface);border-radius:18px;padding:14px 16px;box-shadow:var(--shadow-1);cursor:pointer;display:flex;flex-direction:column;gap:9px;transition:transform .25s var(--spring), box-shadow .25s;border:1px solid transparent;}
+  .trade-card{background-image:linear-gradient(180deg,var(--surface-2),var(--surface));background-color:var(--surface);border-radius:18px;padding:14px 16px;box-shadow:var(--shadow-1), inset 0 1px 0 var(--edge);cursor:pointer;display:flex;flex-direction:column;gap:9px;border:1px solid var(--sep);transition:transform .25s var(--spring), box-shadow .25s;}
   html[data-theme="dark"] .trade-card{border-color:var(--sep);}
   .trade-card:active{transform:scale(.975);}
   .trade-card .tc-top{display:flex;align-items:center;gap:8px;}
   .trade-card .tc-sym{font-weight:800;font-size:16px;letter-spacing:-.3px;}
-  .trade-card .tc-pnl{margin-left:auto;font-weight:600;font-size:18px;letter-spacing:-.3px;}
+  .trade-card .tc-pnl{margin-left:auto;font-weight:700;font-size:18px;letter-spacing:-.4px;}
   .trade-card .tc-meta{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:12px;color:var(--text-2);font-weight:500;}
   .trade-card .tc-meta .dot{width:3px;height:3px;border-radius:50%;background:var(--text-3);}
   .trade-card .tc-note{font-size:12.5px;color:var(--text-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   .trade-card .tc-strip{position:absolute;left:0;top:14px;bottom:14px;width:3px;border-radius:3px;}
   .chip-row{display:flex;gap:8px;overflow-x:auto;padding:2px 0 6px 0;scrollbar-width:none;-ms-overflow-style:none;}
   .chip-row::-webkit-scrollbar{display:none;}
-  .chip-row select{flex-shrink:0;padding:7px 30px 7px 12px;min-height:34px;font-size:12.5px;border-radius:999px;background-color:var(--surface);font-weight:600;}
+  .chip-row select{flex-shrink:0;padding:7px 30px 7px 12px;min-height:34px;font-size:12.5px;border-radius:999px;background-color:var(--input-bg);font-weight:600;}
   .chip-row select.filtered{background-color:var(--accent-dim);color:var(--accent);}
 
   /* ---------- Modal / Sheet ---------- */
   .overlay{
     position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:20px;
-    background:rgba(0,0,0,.30);backdrop-filter:blur(10px) saturate(120%);-webkit-backdrop-filter:blur(10px) saturate(120%);
+    background:var(--overlay-bg);backdrop-filter:blur(10px) saturate(120%);-webkit-backdrop-filter:blur(10px) saturate(120%);
     animation:overlayIn .28s var(--ease);
   }
-  html[data-theme="dark"] .overlay{background:rgba(0,0,0,.55);}
   .overlay.closing{animation:overlayOut .24s var(--ease) forwards;}
   @keyframes overlayIn{from{opacity:0;}to{opacity:1;}}
   @keyframes overlayOut{from{opacity:1;}to{opacity:0;}}
   .modal{
-    background:var(--surface);border-radius:var(--r-xl);width:700px;max-width:100%;max-height:calc(100vh - 40px);max-height:calc(100dvh - 40px);
-    overflow:auto;padding:24px 26px 22px 26px;box-shadow:var(--shadow-3);position:relative;
+    background-image:linear-gradient(180deg,var(--surface-2),var(--surface));background-color:var(--surface);border-radius:var(--r-xl);width:700px;max-width:100%;max-height:calc(100vh - 40px);max-height:calc(100dvh - 40px);
+    overflow:auto;padding:24px 26px 22px 26px;box-shadow:var(--shadow-3), inset 0 1px 0 var(--edge);position:relative;
     animation:modalIn .42s var(--spring);overscroll-behavior:contain;-webkit-overflow-scrolling:touch;
   }
   html[data-theme="dark"] .modal{border:1px solid var(--sep);}
@@ -394,24 +615,24 @@
   .time-select-row select{flex:1;min-width:0;}
   .time-select-row .time-sep{color:var(--text-3);font-weight:700;}
   .tz-hint{font-size:11px;color:var(--text-3);padding-left:2px;line-height:1.4;}
-  .toggle-row{display:flex;gap:0;background:var(--fill);border-radius:12px;padding:2.5px;position:relative;isolation:isolate;}
+  .toggle-row{display:flex;gap:0;background:var(--fill);border:1px solid var(--sep);border-radius:12px;padding:2.5px;position:relative;isolation:isolate;}
   .toggle-btn{flex:1;position:relative;z-index:1;background:transparent;border:none;color:var(--text-2);padding:8px 0;border-radius:10px;font-size:12.5px;font-weight:600;cursor:pointer;text-align:center;transition:color .2s, transform .2s var(--spring);}
   .toggle-btn.active{color:var(--text);}
   .toggle-btn:active{transform:scale(.95);}
   .toggle-btn.long.active{color:var(--gain);}
   .toggle-btn.short.active{color:var(--loss);}
   .form-preview{
-    grid-column:1/-1;background:linear-gradient(135deg,var(--surface-2),var(--surface-2));border-radius:16px;
-    padding:14px 16px;display:flex;gap:26px;flex-wrap:wrap;border:1px solid var(--sep);
+    grid-column:1/-1;background:var(--input-bg);border-radius:16px;
+    padding:14px 16px;display:flex;gap:26px;flex-wrap:wrap;border:1px solid var(--input-border);
   }
   .form-preview .fp-item .fp-lbl{font-size:11px;color:var(--text-3);font-weight:600;}
-  .form-preview .fp-item .fp-val{font-size:20px;font-weight:600;letter-spacing:-.4px;transition:color .3s;}
+  .form-preview .fp-item .fp-val{font-size:20px;font-weight:700;letter-spacing:-.5px;transition:color .3s;}
   .modal-foot{display:flex;justify-content:flex-end;gap:10px;margin-top:22px;}
   .modal-foot .btn-primary,.modal-foot .btn-secondary{padding:11px 20px;font-size:14px;}
 
   /* ---------- Image upload slots ---------- */
   .img-upload-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
-  .img-slot{background:var(--surface-2);border-radius:14px;padding:8px;display:flex;flex-direction:column;gap:7px;border:1px solid var(--sep);transition:transform .25s var(--spring);}
+  .img-slot{background:var(--input-bg);border-radius:14px;padding:8px;display:flex;flex-direction:column;gap:7px;border:1px solid var(--input-border);box-shadow:var(--input-shadow);transition:transform .25s var(--spring);}
   .img-slot-label{font-size:11px;color:var(--text-3);font-weight:600;padding-left:2px;}
   .img-slot-thumb{width:100%;height:86px;object-fit:cover;border-radius:9px;cursor:zoom-in;display:block;transition:transform .3s var(--spring);}
   .img-slot-thumb:hover{transform:scale(1.03);}
@@ -422,8 +643,8 @@
 
   /* ---------- Trade detail modal ---------- */
   .detail-modal{width:780px;}
-  .detail-hero{display:flex;align-items:center;gap:14px;margin-bottom:18px;padding:16px 18px;border-radius:18px;background:var(--surface-2);}
-  .detail-hero .dh-pnl{font-size:34px;font-weight:600;letter-spacing:-.9px;line-height:1;}
+  .detail-hero{display:flex;align-items:center;gap:14px;margin-bottom:18px;padding:16px 18px;border-radius:18px;background:var(--input-bg);border:1px solid var(--input-border);}
+  .detail-hero .dh-pnl{font-size:34px;font-weight:700;letter-spacing:-1.1px;line-height:1;}
   .detail-hero .dh-sub{font-size:12.5px;color:var(--text-2);font-weight:500;margin-top:5px;display:flex;gap:6px;align-items:center;flex-wrap:wrap;}
   .detail-hero .dh-badges{margin-left:auto;display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;}
   .detail-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px 16px;margin-bottom:18px;padding-bottom:16px;border-bottom:1px solid var(--sep);}
@@ -431,9 +652,9 @@
   .detail-item-val{font-size:14px;font-weight:600;}
   .detail-block{margin-bottom:16px;}
   .detail-block-lbl{font-size:12px;color:var(--text-2);font-weight:600;margin-bottom:7px;padding-left:2px;}
-  .detail-block-text{font-size:13.5px;white-space:pre-wrap;word-break:break-word;background:var(--surface-2);border-radius:14px;padding:12px 14px;line-height:1.6;}
+  .detail-block-text{font-size:13.5px;white-space:pre-wrap;word-break:break-word;background:var(--input-bg);border:1px solid var(--input-border);border-radius:14px;padding:12px 14px;line-height:1.6;}
   .detail-imgs{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
-  .detail-img-card{background:var(--surface-2);border-radius:14px;padding:8px;border:1px solid var(--sep);}
+  .detail-img-card{background:var(--input-bg);border-radius:14px;padding:8px;border:1px solid var(--input-border);}
   .detail-img-lbl{font-size:11px;color:var(--text-3);margin-bottom:6px;font-weight:600;}
   .detail-img-thumb{width:100%;border-radius:9px;cursor:zoom-in;display:block;object-fit:cover;max-height:160px;transition:transform .3s var(--spring);}
   .detail-img-thumb:hover{transform:scale(1.03);}
@@ -492,8 +713,7 @@
   .dim-table-card tbody tr{cursor:default;}
   .dim-table-card tbody tr:hover{background:transparent;}
   .rank-num{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:var(--fill);font-weight:700;font-size:11px;}
-  .rank-num.gold{background:rgba(255,204,0,.22);color:#b8860b;}
-  html[data-theme="dark"] .rank-num.gold{color:#ffd60a;}
+  .rank-num.gold{background:rgba(255,204,0,.22);color:var(--rank-gold-text);}
 
   /* ---------- Calendar ---------- */
   .cal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}
@@ -517,7 +737,7 @@
   .cal-cell.today .d{background:var(--accent);color:#fff;}
   .cal-cell.selected{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent);}
   .cal-cell .d{font-size:11.5px;color:var(--text-2);font-weight:600;width:22px;height:22px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;}
-  .cal-cell .p{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:-.3px;}
+  .cal-cell .p{font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:-.3px;}
   .cal-cell .n{font-size:10px;color:var(--text-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600;}
   .legend{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--text-3);margin-top:14px;flex-wrap:wrap;font-weight:500;}
   .legend .sw{width:12px;height:12px;border-radius:4px;}
@@ -544,16 +764,16 @@
   .footer-note{text-align:center;color:var(--text-3);font-size:11.5px;margin-top:40px;font-weight:500;}
 
   /* ---------- Auth ---------- */
-  .auth-screen{min-height:100vh;min-height:100dvh;display:flex;align-items:center;justify-content:center;background:var(--bg);padding:20px;position:relative;overflow:hidden;}
+  .auth-screen{min-height:100vh;min-height:100dvh;display:flex;align-items:center;justify-content:center;background:transparent;padding:20px;position:relative;overflow:hidden;}
   .auth-bg{position:absolute;inset:0;pointer-events:none;overflow:hidden;}
   .auth-bg span{position:absolute;border-radius:50%;filter:blur(70px);opacity:.45;animation:blob 14s ease-in-out infinite alternate;}
-  .auth-bg span:nth-child(1){width:380px;height:380px;background:var(--accent);top:-120px;left:-80px;}
-  .auth-bg span:nth-child(2){width:320px;height:320px;background:var(--purple);bottom:-100px;right:-60px;animation-delay:-5s;}
-  .auth-bg span:nth-child(3){width:260px;height:260px;background:var(--gain);bottom:20%;left:10%;animation-delay:-9s;opacity:.3;}
+  .auth-bg span:nth-child(1){width:420px;height:420px;background:var(--accent);top:-140px;left:-100px;opacity:.5;}
+  .auth-bg span:nth-child(2){width:340px;height:340px;background:var(--accent-deep);bottom:-110px;right:-80px;animation-delay:-5s;opacity:.45;}
+  .auth-bg span:nth-child(3){width:260px;height:260px;background:var(--accent-2);bottom:20%;left:10%;animation-delay:-9s;opacity:.22;}
   @keyframes blob{from{transform:translate(0,0) scale(1);}to{transform:translate(40px,-30px) scale(1.15);}}
   .auth-card{width:100%;max-width:380px;background:var(--glass-strong);backdrop-filter:blur(30px) saturate(180%);-webkit-backdrop-filter:blur(30px) saturate(180%);border-radius:var(--r-xl);padding:34px 28px 28px 28px;box-shadow:var(--shadow-3);position:relative;animation:modalIn .55s var(--spring);}
   html[data-theme="dark"] .auth-card{border:1px solid var(--sep);}
-  .auth-card .auth-logo{width:64px;height:64px;border-radius:18px;margin:0 auto 16px auto;display:block;box-shadow:0 12px 30px rgba(0,122,255,.30);}
+  .auth-card .auth-logo{width:64px;height:64px;border-radius:18px;margin:0 auto 16px auto;display:block;box-shadow:0 12px 32px rgba(124,58,237,.38), 0 0 0 1px var(--edge);}
   .auth-card h1{font-size:24px;margin:0 0 6px 0;text-align:center;letter-spacing:-.6px;font-weight:800;}
   .auth-card p{color:var(--text-2);font-size:13.5px;margin:0 0 22px 0;text-align:center;}
   .auth-card input{width:100%;padding:12px 14px;border-radius:12px;margin-bottom:10px;font-size:15px;min-height:46px;}
@@ -654,19 +874,20 @@
     .mobile-nav-item:active{transform:scale(.88);}
     .mobile-nav-item svg{width:24px;height:24px;stroke-width:1.8;transition:transform .4s var(--spring);}
     .mobile-nav-item.active{color:var(--accent);}
+    .mobile-nav-item.active svg{filter:drop-shadow(0 0 10px var(--accent-dim));}
     .mobile-nav-item.active svg{animation:tabBounce .45s var(--spring);}
     @keyframes tabBounce{0%{transform:scale(1);}40%{transform:scale(1.22) translateY(-2px);}100%{transform:scale(1);}}
     .mobile-fab{
       display:flex;position:fixed;right:18px;bottom:calc(var(--tabbar-h) + 18px + env(safe-area-inset-bottom));z-index:95;
       width:56px;height:56px;border-radius:50%;
-      background:linear-gradient(145deg,var(--accent-2),var(--accent));color:#fff;border:none;
+      background:linear-gradient(145deg,var(--accent-2),var(--accent) 55%,var(--accent-deep));color:#fff;border:none;
       align-items:center;justify-content:center;
-      box-shadow:0 10px 26px rgba(0,122,255,.42), 0 2px 6px rgba(0,0,0,.12);cursor:pointer;
+      box-shadow:0 10px 28px rgba(109,60,225,.45), 0 2px 6px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.25);cursor:pointer;
       transition:transform .35s var(--spring), box-shadow .2s;
       animation:fabIn .6s .25s var(--spring) both;
     }
     .mobile-fab svg{width:26px;height:26px;stroke-width:2.6;}
-    .mobile-fab:active{transform:scale(.88) rotate(90deg);box-shadow:0 4px 12px rgba(0,122,255,.3);}
+    .mobile-fab:active{transform:scale(.88) rotate(90deg);box-shadow:0 4px 14px rgba(109,60,225,.4);}
     @keyframes fabIn{from{transform:scale(0) rotate(-90deg);opacity:0;}to{transform:scale(1) rotate(0);opacity:1;}}
     .toast{max-width:100%;font-size:13px;}
   }
@@ -684,12 +905,14 @@
 </head>
 <body>
 <div class="splash" id="splash">
-  <svg class="splash-logo logo-mark" viewBox="0 0 64 64" width="84" height="84"><defs><linearGradient id="lg1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#5ac8fa"/><stop offset="1" stop-color="#007aff"/></linearGradient></defs><rect width="64" height="64" rx="16" fill="url(#lg1)"/><path d="M14 42 L24 30 L32 36 L50 18" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="50" cy="18" r="4" fill="#fff"/></svg>
+  <svg class="splash-logo logo-mark" viewBox="0 0 64 64" width="84" height="84"><defs><linearGradient id="lg1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#a78bfa"/><stop offset=".55" stop-color="#8b5cf6"/><stop offset="1" stop-color="#5b21b6"/></linearGradient></defs><rect width="64" height="64" rx="16" fill="url(#lg1)"/><path d="M14 42 L24 30 L32 36 L50 18" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="50" cy="18" r="4" fill="#fff"/></svg>
   <div class="splash-title">Futures Journal</div>
   <div class="splash-sub" id="splashSub">Loading your journal…</div>
   <div class="spinner" style="margin-top:6px;"></div>
 </div>
 <div id="app"></div>
+<div id="cursor-glow" aria-hidden="true"></div>
+<canvas id="bg-x" aria-hidden="true"></canvas>
 <div class="toast-wrap" id="toastWrap"></div>
 
 <script>
@@ -747,7 +970,7 @@ const ICONS = {
   logout:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M10 17l5-5-5-5M15 12H3M21 4v16"/></svg>',
   flame:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c4 0 7-3 7-7 0-3-2-5-3-7-1 2-2 3-3 3 0-3-1-6-4-8 0 4-4 6-4 12 0 4 3 7 7 7z"/></svg>',
 };
-const LOGO_SVG = `<svg class="logo-mark" viewBox="0 0 64 64"><defs><linearGradient id="lg2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#5ac8fa"/><stop offset="1" stop-color="#007aff"/></linearGradient></defs><rect width="64" height="64" rx="16" fill="url(#lg2)"/><path d="M14 42 L24 30 L32 36 L50 18" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="50" cy="18" r="4" fill="#fff"/></svg>`;
+const LOGO_SVG = `<svg class="logo-mark" viewBox="0 0 64 64"><defs><linearGradient id="lg2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#a78bfa"/><stop offset=".55" stop-color="#8b5cf6"/><stop offset="1" stop-color="#5b21b6"/></linearGradient></defs><rect width="64" height="64" rx="16" fill="url(#lg2)"/><path d="M14 42 L24 30 L32 36 L50 18" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="50" cy="18" r="4" fill="#fff"/></svg>`;
 
 /* ============================= STORAGE (Supabase, with local fallback) ============================= */
 const SUPABASE_URL = 'https://beeqyufzleajrlyaievr.supabase.co';
@@ -875,7 +1098,7 @@ async function signOut(){
 /* ============================= STATE ============================= */
 let state = {
   trades: [],
-  settings: { defaultRiskPerTrade: 100, theme: 'light', lastJournal: 'live', lastCategory: 'real', sound: true },
+  settings: { defaultRiskPerTrade: 100, theme: 'dark', lastJournal: 'live', lastCategory: 'real', sound: true },
   activeTab: 'dashboard',
   journal: 'live',
   category: 'real',
@@ -925,34 +1148,204 @@ function setSync(s){
 }
 
 /* ============================= THEME ============================= */
-function applyTheme(theme, x, y){
-  const t = theme==='dark' ? 'dark' : 'light';
-  const doSet = ()=>{
-    document.documentElement.setAttribute('data-theme', t);
-    const meta = document.querySelector('meta[name="theme-color"]:not([media])') || (()=>{ const m=document.createElement('meta'); m.name='theme-color'; document.head.appendChild(m); return m; })();
-    meta.content = t==='dark' ? '#000000' : '#f2f2f7';
-  };
-  if(document.startViewTransition && !reducedMotion() && x!=null){
-    const r = Math.hypot(Math.max(x, innerWidth-x), Math.max(y, innerHeight-y));
-    const vt = document.startViewTransition(doSet);
-    vt.ready.then(()=>{
-      document.documentElement.animate(
-        { clipPath:[`circle(0px at ${x}px ${y}px)`, `circle(${r}px at ${x}px ${y}px)`] },
-        { duration:520, easing:'cubic-bezier(.22,1,.36,1)', pseudoElement:'::view-transition-new(root)' }
-      );
-    });
-    vt.finished.then(()=>{ redrawChartsForTheme(); });
-  } else { doSet(); redrawChartsForTheme(); }
+/* A theme change is now pure CSS. Every colour / shadow token is a registered @property (see the
+   top of the stylesheet) that transitions on <html>, so the page background, gradients, cards,
+   shadows and calendar tints all fade together on one timeline — nothing is re-rendered, no
+   snapshot/blur tricks, no flash.
+   The only things CSS can't reach are canvases (Chart.js + the X-mark backdrop). For those a short
+   rAF loop reads the live, mid-transition token values and repaints, so they fade in step too. */
+const THEME_MS = 600;               /* keep in sync with the token transition duration in the CSS */
+let __themeUntil = 0, __themeRaf = 0;
+
+function retintCharts(){
+  if(!window.Chart) return;
+  const keys = Object.keys(charts);
+  if(!keys.length) return;
+  chartDefaults();                                   /* refresh label / tooltip colours from the live tokens */
+  const gain = cssVar('--gain'), loss = cssVar('--loss'), accent = cssVar('--accent'), fill2 = cssVar('--fill-2');
+  const t3 = cssVar('--text-3'), sep = cssVar('--sep');
+  keys.forEach(k=>{
+    const ch = charts[k]; if(!ch || !ch.data || !ch.data.datasets[0]) return;
+    const ds = ch.data.datasets[0], type = ch.config.type;
+    if(type==='bar'){
+      const cols = ds.data.map(v=> v>=0 ? gain : loss);
+      ds.backgroundColor = cols; ds.hoverBackgroundColor = cols;
+    } else if(type==='line'){
+      const last = ds.data.length ? ds.data[ds.data.length-1] : 0;
+      const lc = last>=0 ? gain : loss;
+      const h = (ch.canvas.parentElement && ch.canvas.parentElement.clientHeight) || 220;
+      const g = ch.ctx.createLinearGradient(0,0,0,h);
+      g.addColorStop(0, tintA(lc,.28)); g.addColorStop(1, tintA(lc,0));
+      ds.borderColor = lc; ds.backgroundColor = g; ds.pointHoverBackgroundColor = lc;
+    } else if(type==='doughnut'){
+      ds.backgroundColor = k==='wl' ? [gain,loss,fill2] : [gain,loss,accent,fill2];
+    }
+    const sc = ch.options && ch.options.scales;
+    if(sc){
+      if(sc.x && sc.x.ticks) sc.x.ticks.color = t3;
+      if(sc.y){ if(sc.y.ticks) sc.y.ticks.color = t3; if(sc.y.grid) sc.y.grid.color = sep; }
+    }
+    ch.update('none');
+  });
 }
-function redrawChartsForTheme(){ if(state.loaded && document.getElementById('main')) renderMain(); }
-function toggleTheme(ev){
+function themeSyncFrame(){
+  __themeRaf = 0;
+  retintCharts();
+  if(window.__bgRedraw) window.__bgRedraw();
+  if(performance.now() < __themeUntil) __themeRaf = requestAnimationFrame(themeSyncFrame);
+  else document.documentElement.classList.remove('theme-switching');
+}
+function applyTheme(theme){
+  const t = theme==='dark' ? 'dark' : 'light';
+  const root = document.documentElement;
+  const changed = root.getAttribute('data-theme') !== t;
+  const animate = changed && state.loaded && !reducedMotion();
+  if(animate) root.classList.add('theme-switching');   /* same task as the attribute flip → one style recalc */
+  root.setAttribute('data-theme', t);
+  const meta = document.querySelector('meta[name="theme-color"]:not([media])') || (()=>{ const m=document.createElement('meta'); m.name='theme-color'; document.head.appendChild(m); return m; })();
+  meta.content = t==='dark' ? '#07050d' : '#f5f2fb';
+  renderShellState();                                  /* switch knob + sun/moon icon */
+  if(!changed) return;
+  __themeUntil = performance.now() + (animate ? THEME_MS + 140 : 0);
+  if(!__themeRaf) __themeRaf = requestAnimationFrame(themeSyncFrame);
+}
+function toggleTheme(){
   state.settings.theme = state.settings.theme==='dark' ? 'light' : 'dark';
-  const x = ev && ev.clientX!=null ? ev.clientX : innerWidth/2, y = ev && ev.clientY!=null ? ev.clientY : innerHeight/2;
   SFX.toggle(); haptic('medium');
-  applyTheme(state.settings.theme, x, y);
-  renderShellState();
+  applyTheme(state.settings.theme);
   saveSettings();
 }
+
+/* ============================= CURSOR SPOTLIGHT + X-MARK FIELD ============================= */
+/* Two things follow the pointer, sharing one smoothed position:
+   - #cursor-glow : a soft violet radial wash (radius = --glow-r in the CSS)
+   - #bg-x canvas : the faint grid of X marks. Marks within --x-radius of the cursor ease up to
+                    "lit": they grow, brighten and spin a quarter-turn (an X rotated 90° is an X
+                    again, so the twirl resolves cleanly at full strength and unwinds when the
+                    cursor leaves). Each mark eases on its own, so a trail follows the cursor.
+   Both fade back to the calm ambient look after ~2.2s of idle. Touch devices get the static grid. */
+(function initBackdrop(){
+  const cv = document.getElementById('bg-x'); if(!cv) return;
+  const ctx = cv.getContext('2d');
+  const glow = document.getElementById('cursor-glow');
+  const hoverCapable = !window.matchMedia('(hover: none)').matches;
+  const rmq = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  const CELL = 56, OFF = 28, HALF = 6;   /* same 56px tile / 12px X as the old SVG pattern */
+  const ACTIVE = .004;
+  let R = 250;
+  let W = 0, H = 0, dpr = 1, cols = 0, rows = 0, infl = new Float32Array(0);
+  let colBase = 'rgba(167,139,250,.09)', colLit = 'rgba(196,181,253,.85)';
+  let tx = -600, ty = -600, cx = -600, cy = -600;
+  let seen = false, lit = false, idleT = null, raf = 0, last = 0;
+
+  function readColors(){
+    const cs = getComputedStyle(document.documentElement);
+    const b = cs.getPropertyValue('--x-base').trim(), l = cs.getPropertyValue('--x-lit').trim();
+    if(b) colBase = b; if(l) colLit = l;
+    const r = parseFloat(cs.getPropertyValue('--x-radius')); if(r > 0) R = r;
+  }
+  function resize(){
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    W = window.innerWidth; H = window.innerHeight;
+    cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+    cols = Math.ceil(W / CELL) + 1; rows = Math.ceil(H / CELL) + 1;
+    infl = new Float32Array(cols * rows);
+    readColors(); drawFrame();
+  }
+  function xPath(x, y, h){
+    ctx.moveTo(x-h, y-h); ctx.lineTo(x+h, y+h);
+    ctx.moveTo(x+h, y-h); ctx.lineTo(x-h, y+h);
+  }
+  function drawFrame(){
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, W, H);
+    ctx.lineCap = 'round';
+    /* 1) every calm mark in one batched stroke */
+    ctx.globalAlpha = 1; ctx.strokeStyle = colBase; ctx.lineWidth = 1;
+    ctx.beginPath();
+    let any = false;
+    for(let j=0; j<rows; j++){
+      const y = OFF + j*CELL;
+      for(let i=0; i<cols; i++){
+        if(infl[j*cols+i] >= ACTIVE){ any = true; continue; }
+        xPath(OFF + i*CELL, y, HALF);
+      }
+    }
+    ctx.stroke();
+    if(!any) return;
+    /* 2) marks the cursor is touching: rotate + grow + brighten, cross-fading base → lit colour */
+    const still = rmq.matches;
+    for(let j=0; j<rows; j++){
+      for(let i=0; i<cols; i++){
+        const s = infl[j*cols+i]; if(s < ACTIVE) continue;
+        const e = s*s*(3-2*s);
+        ctx.save();
+        ctx.translate(OFF + i*CELL, OFF + j*CELL);
+        if(!still) ctx.rotate(e * Math.PI * .5);
+        const h = still ? HALF : HALF * (1 + .8*e);
+        ctx.beginPath(); xPath(0, 0, h);
+        ctx.globalAlpha = 1 - e; ctx.strokeStyle = colBase; ctx.lineWidth = 1; ctx.stroke();
+        ctx.globalAlpha = e;     ctx.strokeStyle = colLit;  ctx.lineWidth = 1 + .4*e; ctx.stroke();
+        ctx.restore();
+      }
+    }
+    ctx.globalAlpha = 1;
+  }
+  function step(ts){
+    raf = 0;
+    const dt = Math.min(50, last ? ts - last : 16.7); last = ts;
+    const f = dt / 16.7;
+    let busy = false;
+    if(hoverCapable){
+      const dx = tx - cx, dy = ty - cy;
+      if(Math.abs(dx) < .5 && Math.abs(dy) < .5){ cx = tx; cy = ty; }
+      else { const k = 1 - Math.pow(1 - .16, f); cx += dx*k; cy += dy*k; busy = true; }
+      glow.style.setProperty('--mx', cx.toFixed(1) + 'px');
+      glow.style.setProperty('--my', cy.toFixed(1) + 'px');
+      /* per-mark easing toward its target influence */
+      const kk = 1 - Math.pow(1 - .13, f), R2 = R*R;
+      for(let j=0; j<rows; j++){
+        const y = OFF + j*CELL - cy;
+        for(let i=0; i<cols; i++){
+          const k = j*cols + i;
+          let target = 0;
+          if(lit){
+            const x = OFF + i*CELL - cx, d2 = x*x + y*y;
+            if(d2 < R2){ const u = 1 - Math.sqrt(d2)/R; target = u*u*(3-2*u); }
+          }
+          const cur = infl[k], d = target - cur;
+          if(Math.abs(d) > .002){ infl[k] = cur + d*kk; busy = true; }
+          else if(cur !== target) infl[k] = target;
+        }
+      }
+    }
+    drawFrame();
+    if(busy) raf = requestAnimationFrame(step); else last = 0;
+  }
+  const kick = ()=>{ if(!raf) raf = requestAnimationFrame(step); };
+
+  /* theme fade: repaint with the live mid-transition colours (called from themeSyncFrame) */
+  window.__bgRedraw = function(){ readColors(); drawFrame(); };
+
+  window.addEventListener('resize', resize, { passive:true });
+  resize();
+
+  if(!hoverCapable) return;   /* touch devices: static grid only */
+  const dim = ()=>{ lit = false; document.body.classList.remove('cursor-lit'); kick(); };
+  const onMove = (e)=>{
+    tx = e.clientX; ty = e.clientY;
+    if(!seen){ seen = true; cx = tx; cy = ty; }         /* snap on first sighting, no fly-in */
+    lit = true;
+    document.body.classList.add('cursor-lit');
+    clearTimeout(idleT); idleT = setTimeout(dim, 2200);
+    kick();
+  };
+  const onLeave = ()=>{ clearTimeout(idleT); dim(); };
+  window.addEventListener('pointermove', onMove, { passive:true });
+  document.addEventListener('mouseleave', onLeave);
+  window.addEventListener('blur', onLeave);
+})();
 
 /* ============================= SOUND ENGINE (Web Audio, synthesized) ============================= */
 const SFX = (()=>{
@@ -1327,7 +1720,7 @@ function shortDate(dateStr){ const d = new Date(dateStr+'T00:00:00'); return MON
 
 /* ============================= CHART HELPERS ============================= */
 function chartDefaults(){
-  Chart.defaults.font.family = "'Manrope', 'Inter', 'Helvetica Neue', Arial, sans-serif";
+  Chart.defaults.font.family = "'Inter', 'Helvetica Neue', Arial, sans-serif";
   Chart.defaults.font.weight = '500';
   Chart.defaults.color = cssVar('--text-2');
   Chart.defaults.animation.duration = (reducedMotion() || !renderAnimated) ? 0 : 450;
@@ -1345,7 +1738,16 @@ function chartDefaults(){
 }
 function destroyChart(key){ if(charts[key]){ charts[key].destroy(); delete charts[key]; } }
 function cssVar(name){ return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
-function hexA(hex, a){ if(hex.startsWith('rgb')) return hex; const [r,g,b] = hexToRgb(hex); return `rgba(${r},${g},${b},${a})`; }
+/* alpha-tint any CSS colour string (hex, rgb[a](), color(srgb …)). Registered colour tokens read back from
+   getComputedStyle as rgb(...), so this replaces the old hex-only helper. */
+function tintA(c, a){
+  c = (c||'').trim();
+  if(c[0]==='#') { const [r,g,b] = hexToRgb(c); return `rgba(${r},${g},${b},${a})`; }
+  const n = (c.match(/-?\d*\.?\d+(?:e-?\d+)?/g)||[]).map(Number);
+  if(/^color\(/.test(c)) return `rgba(${Math.round(n[0]*255)},${Math.round(n[1]*255)},${Math.round(n[2]*255)},${a})`;
+  return `rgba(${n[0]},${n[1]},${n[2]},${a})`;
+}
+function hexA(c, a){ return tintA(c, a); }
 function barOpts(extra){
   return Object.assign({ responsive:true, maintainAspectRatio:false,
     plugins:{legend:{display:false}, tooltip:{callbacks:{label:(c)=>' '+fmtMoney(c.parsed.y,true)}}},
@@ -1551,7 +1953,7 @@ function renderBestMonthCard(trades){
     <div style="display:flex;align-items:center;gap:14px;padding-top:4px;">
       <div style="width:46px;height:46px;border-radius:14px;background:var(--gain-dim);color:var(--gain);display:flex;align-items:center;justify-content:center;flex-shrink:0;">${ICONS.flame.replace('<svg','<svg width="22" height="22" stroke-width="2"')}</div>
       <div style="min-width:0;">
-        <div class="num pos" style="font-size:22px;font-weight:600;letter-spacing:-.4px;">${best.label}</div>
+        <div class="num pos" style="font-size:22px;font-weight:700;letter-spacing:-.5px;">${best.label}</div>
         <div style="font-size:12.5px;color:var(--text-2);margin-top:2px;font-weight:500;">${fmtMoney(best.net,true)} · ${best.count} trade${best.count===1?'':'s'} · ${fmtPct(best.wr)} win rate</div>
       </div>
     </div>`;
@@ -1907,9 +2309,13 @@ function drawOutcomeChart(trades){
 
 /* ============================= CALENDAR ============================= */
 function isDarkTheme(){ return document.documentElement.getAttribute('data-theme')==='dark'; }
+/* Calendar day tint = mix of two theme tokens, so it fades with the theme instead of being baked-in inline colours */
+function calTint(kind, inten){
+  return `--i:${Math.max(0,Math.min(1,inten)).toFixed(3)};background:color-mix(in srgb, var(--cal-${kind}-b) calc(var(--i) * 100%), var(--cal-${kind}-a));`;
+}
 function calDayPalette(){
-  if(isDarkTheme()) return { winA:'#10261a', winB:'#1f5a33', winBorder:'rgba(48,209,88,.45)', lossA:'#2c1412', lossB:'#5a231d', lossBorder:'rgba(255,69,58,.45)' };
-  return { winA:'#eafaee', winB:'#a8e8b8', winBorder:'rgba(52,199,89,.4)', lossA:'#fff0ee', lossB:'#ffc0ba', lossBorder:'rgba(255,59,48,.4)' };
+  if(isDarkTheme()) return { winA:'#0d1f17', winB:'#14503a', winBorder:'rgba(52,211,153,.45)', lossA:'#2a1016', lossB:'#6e1f36', lossBorder:'rgba(255,77,109,.45)' };
+  return { winA:'#eefaf3', winB:'#a5e8c6', winBorder:'rgba(15,169,104,.4)', lossA:'#fdeef1', lossB:'#f3b8c3', lossBorder:'rgba(229,52,75,.4)' };
 }
 function mix(hexA, hexB, t){
   const a = hexToRgb(hexA), b = hexToRgb(hexB);
@@ -1925,7 +2331,6 @@ function renderCalendar(main){
   const startDow = first.getDay();
   const daysInMonth = new Date(y,m+1,0).getDate();
   const todayStr = new Date().toISOString().slice(0,10);
-  const pal = calDayPalette();
   const dayRisk = (parseFloat(state.settings.defaultRiskPerTrade)||100);
   let cells = '';
   for(let i=0;i<startDow;i++) cells += `<div class="cal-cell empty"></div>`;
@@ -1936,8 +2341,8 @@ function renderCalendar(main){
     const pnl = dayTrades.reduce((s,t)=>s+t.pnl,0);
     let style = '';
     if(dayTrades.length){
-      if(pnl>0){ greenDays++; const inten = Math.min(1, pnl/(dayRisk*10)); style = `background:${mix(pal.winA, pal.winB, inten)};border-color:${pal.winBorder};`; }
-      else if(pnl<0){ redDays++; const inten = Math.min(1, Math.abs(pnl)/(dayRisk*10)); style = `background:${mix(pal.lossA, pal.lossB, inten)};border-color:${pal.lossBorder};`; }
+      if(pnl>0){ greenDays++; const inten = Math.min(1, pnl/(dayRisk*10)); style = `${calTint('win', inten)}border-color:var(--cal-win-border);`; }
+      else if(pnl<0){ redDays++; const inten = Math.min(1, Math.abs(pnl)/(dayRisk*10)); style = `${calTint('loss', inten)}border-color:var(--cal-loss-border);`; }
     }
     cells += `<div class="cal-cell ${dateStr===todayStr?'today':''} ${state.calSelected===dateStr?'selected':''}" style="${style}" data-date="${dateStr}" data-silent>
       <span class="d">${d}</span>
@@ -1965,9 +2370,9 @@ function renderCalendar(main){
       <div class="cal-grid" style="margin-bottom:4px;">${['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map(d=>`<div class="cal-dow">${d}</div>`).join('')}</div>
       <div class="cal-grid">${cells}</div>
       <div class="legend">
-        <span class="sw" style="background:${mix(pal.lossA,pal.lossB,0.8)};"></span> Loss day
+        <span class="sw" style="${calTint('loss',0.8)}"></span> Loss day
         <span class="sw" style="background:var(--surface-2);margin-left:10px;border:1px solid var(--sep);"></span> No trades
-        <span class="sw" style="background:${mix(pal.winA,pal.winB,0.8)};margin-left:10px;"></span> Win day
+        <span class="sw" style="${calTint('win',0.8)}margin-left:10px;"></span> Win day
       </div>
     </div>
     <div id="dayDetail"></div>
@@ -2000,7 +2405,7 @@ function showDayDetail(date, trades){
     <div class="panel" style="margin-top:12px;animation:fadeUp .4s var(--ease) both;">
       <div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:12px;">
         <div><p class="panel-title" style="margin:0;">${prettyDate(date)}</p><p class="panel-note" style="margin:2px 0 0 0;">${trades.length} trade${trades.length===1?'':'s'}</p></div>
-        <div class="num ${colorForPnl(net)}" style="font-size:22px;font-weight:600;letter-spacing:-.4px;">${fmtMoney(net,true)}</div>
+        <div class="num ${colorForPnl(net)}" style="font-size:22px;font-weight:700;letter-spacing:-.5px;">${fmtMoney(net,true)}</div>
       </div>
       <div class="trade-list" style="gap:6px;">${trades.map(tradeCardHtml).join('')}</div>
     </div>`;
@@ -2026,8 +2431,8 @@ function renderSettings(main){
       <div>
         <div class="settings-group-title">Appearance &amp; feel</div>
         <div class="settings-group">
-          ${settingsRow(ICONS.moon, '#5856d6', 'Dark mode', 'True black, easier on the eyes at night', `<button class="switch accent ${state.settings.theme==='dark'?'on':''}" id="settingsThemeSwitch" data-silent aria-label="Dark mode"></button>`)}
-          ${settingsRow(ICONS.sound, '#ff2d55', 'Sound effects', 'Subtle synthesized clicks and chimes', `<button class="switch ${state.settings.sound!==false?'on':''}" id="soundSwitch" data-silent aria-label="Sound effects"></button>`)}
+          ${settingsRow(ICONS.moon, '#8b5cf6', 'Dark mode', 'Deep purple-black, easier on the eyes at night', `<button class="switch accent ${state.settings.theme==='dark'?'on':''}" id="settingsThemeSwitch" data-silent aria-label="Dark mode"></button>`)}
+          ${settingsRow(ICONS.sound, '#c084fc', 'Sound effects', 'Subtle synthesized clicks and chimes', `<button class="switch ${state.settings.sound!==false?'on':''}" id="soundSwitch" data-silent aria-label="Sound effects"></button>`)}
         </div>
       </div>
       <div>
@@ -2039,8 +2444,8 @@ function renderSettings(main){
       <div>
         <div class="settings-group-title">Backup &amp; restore</div>
         <div class="settings-group">
-          ${settingsRow(ICONS.download, '#34aadc', 'Export backup', `${state.trades.length} trade${state.trades.length===1?'':'s'} stored · JSON file`, `<button class="btn-secondary" id="exportJson">Export</button>`)}
-          ${settingsRow(ICONS.upload, '#5ac8fa', 'Import backup', 'Replaces your current journal', `<label class="btn-secondary" style="cursor:pointer;">Import<input type="file" id="importJson" accept="application/json" style="display:none;"></label>`)}
+          ${settingsRow(ICONS.download, '#06b6d4', 'Export backup', `${state.trades.length} trade${state.trades.length===1?'':'s'} stored · JSON file`, `<button class="btn-secondary" id="exportJson">Export</button>`)}
+          ${settingsRow(ICONS.upload, '#38bdf8', 'Import backup', 'Replaces your current journal', `<label class="btn-secondary" style="cursor:pointer;">Import<input type="file" id="importJson" accept="application/json" style="display:none;"></label>`)}
           ${settingsRow(ICONS.trash, 'var(--loss)', 'Clear all trades', 'Permanently deletes every logged trade', `<button class="btn-ghost btn-danger" id="wipeData">Clear</button>`)}
         </div>
       </div>
@@ -2052,7 +2457,7 @@ function renderSettings(main){
       </div>
       <div class="desktop-only">
         <div class="settings-group-title">Keyboard shortcuts</div>
-        <div class="settings-group"><div class="settings-row"><div class="sr-ic" style="background:#8e8e93;">${ICONS.keyboard}</div><div class="sr-body kbd-list">
+        <div class="settings-group"><div class="settings-row"><div class="sr-ic" style="background:var(--fill-2);color:var(--text-2);">${ICONS.keyboard}</div><div class="sr-body kbd-list">
           <div><span>Log a new trade</span><span class="kbd">N</span></div>
           <div><span>Switch pages</span><span><span class="kbd">1</span> – <span class="kbd">5</span></span></div>
           <div><span>Toggle dark mode</span><span class="kbd">T</span></div>
