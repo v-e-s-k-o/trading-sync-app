@@ -483,7 +483,7 @@
   .cat-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-2);}
   .cat-card:active{transform:translateY(0) scale(.98);}
   .cat-card.active{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent), 0 0 34px var(--accent-dim), var(--shadow-2);}
-  .cat-card.active::after{content:'';position:absolute;top:14px;right:14px;width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 3px var(--accent-dim);animation:popIn .4s var(--spring);}
+  .cat-card.active::after{content:'';position:absolute;top:14px;right:14px;width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 3px var(--accent-dim);}
   .cat-card .tag{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-3);}
   @keyframes popIn{from{transform:scale(0);}to{transform:scale(1);}}
 
@@ -496,6 +496,13 @@
   .panel-note{font-size:12px;color:var(--text-3);margin:0 0 14px 0;font-weight:500;}
   .chart-wrap{position:relative;width:100%;}
   .chart-wrap canvas{max-width:100%;}
+  /* Doughnut + its own legend: the legend is plain HTML so items are spaced evenly at any width */
+  .donut-wrap{display:flex;flex-direction:column;gap:12px;}
+  .donut-canvas{position:relative;flex:1;min-height:0;}
+  .chart-legend{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:8px 18px;padding:0 6px;}
+  .cl-item{display:inline-flex;align-items:center;gap:7px;margin:0;padding:2px 0;border:0;background:none;box-shadow:none;border-radius:0;min-height:0;font-family:inherit;font-size:11.5px;font-weight:600;line-height:1.2;color:var(--text-2);cursor:pointer;white-space:nowrap;}
+  .cl-item.off{opacity:.4;text-decoration:line-through;}
+  .cl-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
   .streak-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding-top:4px;}
   .streak-box{background:var(--surface-2);border-radius:14px;padding:12px 14px;border:1px solid var(--sep);}
   .streak-box .lbl{font-size:11px;color:var(--text-2);font-weight:600;margin-bottom:4px;}
@@ -658,12 +665,17 @@
   .detail-img-lbl{font-size:11px;color:var(--text-3);margin-bottom:6px;font-weight:600;}
   .detail-img-thumb{width:100%;border-radius:9px;cursor:zoom-in;display:block;object-fit:cover;max-height:160px;transition:transform .3s var(--spring);}
   .detail-img-thumb:hover{transform:scale(1.03);}
-  .img-lightbox{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:9999;display:flex;align-items:center;justify-content:center;padding:24px;cursor:zoom-out;animation:overlayIn .25s var(--ease);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);}
+  .img-lightbox{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:9999;display:flex;align-items:center;justify-content:center;padding:24px;cursor:default;touch-action:none;user-select:none;-webkit-user-select:none;animation:overlayIn .25s var(--ease);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);overflow:hidden;}
   .img-lightbox.closing{animation:overlayOut .2s var(--ease) forwards;}
-  .img-lightbox img{max-width:100%;max-height:100%;border-radius:12px;box-shadow:0 20px 80px rgba(0,0,0,.6);animation:modalIn .4s var(--spring);}
-  .img-lightbox .lightbox-close{position:absolute;top:calc(18px + env(safe-area-inset-top));right:22px;width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.14);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background-color .2s, transform .3s var(--spring);}
+  .img-lightbox img{width:100%;height:100%;object-fit:contain;cursor:zoom-in;will-change:transform;-webkit-user-drag:none;animation:modalIn .4s var(--spring);}
+  .img-lightbox .lightbox-close{position:absolute;top:calc(18px + env(safe-area-inset-top));right:22px;width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.14);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:3;transition:background-color .2s, transform .3s var(--spring);}
   .img-lightbox .lightbox-close:hover{background:rgba(255,255,255,.25);transform:rotate(90deg);}
   .img-lightbox .lightbox-close svg{width:16px;height:16px;stroke-width:2.6;}
+  .img-lightbox .lightbox-bar{position:absolute;z-index:3;bottom:calc(20px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:2px;padding:4px;border-radius:999px;background:rgba(255,255,255,.14);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);}
+  .img-lightbox .lightbox-bar button{min-width:40px;height:34px;padding:0 10px;border:0;border-radius:999px;background:transparent;color:#fff;font:600 18px/1 inherit;font-family:inherit;cursor:pointer;transition:background-color .2s;}
+  .img-lightbox .lightbox-bar button:hover{background:rgba(255,255,255,.2);}
+  .img-lightbox .lightbox-bar .lb-level{font-size:12px;min-width:58px;font-variant-numeric:tabular-nums;}
+  .img-lightbox .lightbox-status{position:absolute;z-index:3;top:calc(24px + env(safe-area-inset-top));left:50%;transform:translateX(-50%);padding:7px 14px;border-radius:999px;background:rgba(255,255,255,.16);color:#fff;font-size:12px;font-weight:600;pointer-events:none;white-space:nowrap;}
 
   /* ---------- Confirm dialog (iOS alert) ---------- */
   .alert-box{
@@ -1047,6 +1059,66 @@ async function storageSet(key, value){
   }
   return false;
 }
+async function storageDelete(key){
+  if(storageMode==='supabase'){
+    try{
+      const { error } = await sb.from('kv_store').delete().eq('user_id', sbUserId).eq('key', key);
+      if(error) throw error;
+      return true;
+    }catch(e){ console.warn('storageDelete failed', e); return false; }
+  }
+  return false;
+}
+
+/* ---- Full-resolution screenshots ----
+   The trade record only holds the small compressed copy (fast to load, light on space).
+   The full-resolution copy lives in its own kv_store row and is fetched ONLY while the
+   image is open in the viewer, then released again. */
+const FULL_IMG_PREFIX = 'imgfull:';
+function fullImgKey(tradeId, slot){ return FULL_IMG_PREFIX + tradeId + ':' + slot; }
+async function loadFullImage(tradeId, slot){
+  const v = await storageGet(fullImgKey(tradeId, slot));
+  return (typeof v === 'string' && v.indexOf('data:image') === 0) ? v : null;
+}
+/* One-time merge for images uploaded while the app stored two copies: the sharp copy becomes THE image
+   (stored in the trade) and the extra copy is deleted. Safe to re-run; anything that fails is retried next load. */
+async function migrateLegacyFullImages(){
+  if(storageMode!=='supabase') return;
+  const ids = state.trades.filter(t=>t.fullImgs && Object.keys(t.fullImgs).some(k=>t.fullImgs[k])).map(t=>t.id);
+  if(!ids.length) return;
+  const moved = [];
+  for(const id of ids){
+    const t0 = state.trades.find(x=>x.id===id); if(!t0) continue;
+    for(const k of Object.keys(t0.fullImgs||{})){
+      if(!t0.fullImgs[k]) continue;
+      const full = await loadFullImage(id, k);
+      const cur = state.trades.find(x=>x.id===id);
+      if(!full || !cur || !cur.fullImgs || !cur.fullImgs[k]) continue;
+      cur[k] = full; delete cur.fullImgs[k]; moved.push([id, k]);
+    }
+    const cur = state.trades.find(x=>x.id===id);
+    if(cur && cur.fullImgs && !Object.keys(cur.fullImgs).length) delete cur.fullImgs;
+  }
+  if(!moved.length) return;
+  const ok = await saveTrades();
+  if(ok) for(const [id, k] of moved) await storageDelete(fullImgKey(id, k));
+}
+/* Backstop cleanup: remove stored full-res images that no trade references any more
+   (deleted trades, removed screenshots). Only touches rows older than 24h so it can never
+   race with a save that is still in flight on another device. */
+async function cleanupOrphanFullImages(){
+  if(storageMode!=='supabase' || !state.trades.length) return;
+  try{
+    const { data, error } = await sb.from('kv_store').select('key,updated_at').like('key', FULL_IMG_PREFIX + '%');
+    if(error || !data || !data.length) return;
+    const live = new Set();
+    state.trades.forEach(t=>{ if(t.fullImgs) Object.keys(t.fullImgs).forEach(k=>{ if(t.fullImgs[k]) live.add(fullImgKey(t.id, k)); }); });
+    const cutoff = Date.now() - 24*60*60*1000;
+    for(const r of data){
+      if(!live.has(r.key) && new Date(r.updated_at).getTime() < cutoff) await storageDelete(r.key);
+    }
+  }catch(e){ console.warn('orphan cleanup skipped', e); }
+}
 
 /* ---- Auth gate ---- */
 function renderAuthScreen(onDone){
@@ -1229,7 +1301,7 @@ function retintCharts(){
       g.addColorStop(0, tintA(lc,.28)); g.addColorStop(1, tintA(lc,0));
       ds.borderColor = lc; ds.backgroundColor = g; ds.pointHoverBackgroundColor = lc;
     } else if(type==='doughnut'){
-      ds.backgroundColor = k==='wl' ? [gain,loss,fill2] : [gain,loss,accent,fill2];
+      const dc = donutColors(k); ds.backgroundColor = dc; ds.hoverBackgroundColor = dc; syncDonutLegend(ch);
     }
     const sc = ch.options && ch.options.scales;
     if(sc){
@@ -1503,6 +1575,18 @@ function popOverlay(overlay){
   if(!overlayStack.length) document.body.classList.remove('modal-open');
 }
 function closeTopOverlay(){ const top = overlayStack[overlayStack.length-1]; if(top){ top.closeFn(); return true; } return false; }
+/* A backdrop "click" only counts if the press ALSO started on the backdrop. Otherwise, pressing inside a
+   dialog (e.g. selecting text, or holding a button) and releasing outside it makes the browser fire a click
+   on the backdrop, which used to close the dialog and throw away everything typed into it. */
+function onBackdropClick(overlay, handler){
+  let pressedOnBackdrop = false;
+  overlay.addEventListener('pointerdown', (e)=>{ pressedOnBackdrop = (e.target === overlay); }, true);
+  overlay.addEventListener('click', (e)=>{
+    const ok = pressedOnBackdrop && e.target === overlay;
+    pressedOnBackdrop = false;
+    if(ok) handler(e);
+  });
+}
 
 function confirmDialog({title, message, okText='OK', cancelText='Cancel', danger=false}){
   return new Promise(resolve=>{
@@ -1517,21 +1601,142 @@ function confirmDialog({title, message, okText='OK', cancelText='Cancel', danger
     const close = (v)=>{ overlay.classList.add('closing'); popOverlay(overlay); setTimeout(()=>overlay.remove(), 220); resolve(v); };
     pushOverlay(overlay, ()=>close(false));
     overlay.querySelectorAll('button').forEach(b=> b.onclick = ()=> close(b.dataset.v==='1'));
-    overlay.onclick = (e)=>{ if(e.target===overlay) close(false); };
+    onBackdropClick(overlay, ()=>close(false));
   });
 }
 function alertDialog(title, message){ return confirmDialog({title, message, okText:'OK', cancelText:'Close'}); }
 
-function openImageLightbox(src){
+function openImageLightbox(src, opts){
   if(!src) return;
+  opts = opts || {};
   const overlay = document.createElement('div');
   overlay.className = 'img-lightbox';
-  overlay.innerHTML = `<span class="lightbox-close">${ICONS.x}</span><img src="${src}">`;
+  overlay.innerHTML = `<span class="lightbox-close" role="button" aria-label="Close">${ICONS.x}</span><img alt="" draggable="false">
+    <div class="lightbox-bar" role="group" aria-label="Zoom">
+      <button type="button" data-z="out" aria-label="Zoom out">−</button>
+      <button type="button" data-z="reset" class="lb-level" aria-label="Fit to screen">100%</button>
+      <button type="button" data-z="in" aria-label="Zoom in">+</button>
+    </div>`;
+  const img = overlay.querySelector('img'), level = overlay.querySelector('.lb-level');
+  img.src = opts.full || src;              /* compressed copy shows instantly (or the just-added full copy) */
   document.body.appendChild(overlay);
   SFX.open(); haptic('light');
-  const close = ()=>{ overlay.classList.add('closing'); popOverlay(overlay); setTimeout(()=>overlay.remove(), 200); SFX.close(); };
+
+  /* ---- zoom / pan state: the picture is fitted to the screen at 100%; zoom is relative to that ---- */
+  const MIN = 1, MAX = 8;
+  let s = 1, tx = 0, ty = 0;
+  const fitSize = ()=>{                    /* size of the picture itself (not its box) at zoom 100% */
+    const bw = img.offsetWidth, bh = img.offsetHeight, nw = img.naturalWidth || bw, nh = img.naturalHeight || bh;
+    const f = Math.min(bw/nw, bh/nh); return { w: nw*f, h: nh*f };
+  };
+  const clampPan = ()=>{
+    const f = fitSize(), vw = overlay.clientWidth, vh = overlay.clientHeight;
+    const mx = Math.max(0, (f.w*s - vw)/2), my = Math.max(0, (f.h*s - vh)/2);
+    tx = Math.min(mx, Math.max(-mx, tx)); ty = Math.min(my, Math.max(-my, ty));
+  };
+  const apply = (animate)=>{
+    clampPan();
+    img.style.animation = 'none';
+    img.style.transition = animate ? 'transform .22s cubic-bezier(.22,1,.36,1)' : 'none';
+    img.style.transform = `translate(${tx}px,${ty}px) scale(${s})`;
+    img.style.cursor = s > 1 ? 'grab' : 'zoom-in';
+    level.textContent = Math.round(s*100) + '%';
+  };
+  const zoomAt = (px, py, factor, animate)=>{      /* zoom keeping the point under (px,py) fixed */
+    const ns = Math.min(MAX, Math.max(MIN, s*factor)), r = ns/s;
+    const cx = overlay.clientWidth/2, cy = overlay.clientHeight/2;
+    tx = (px-cx) - r*((px-cx) - tx); ty = (py-cy) - r*((py-cy) - ty);
+    s = ns; if(s === 1){ tx = 0; ty = 0; }
+    apply(animate);
+  };
+  const resetZoom = ()=>{ s = 1; tx = 0; ty = 0; apply(true); };
+  const centre = ()=>[overlay.clientWidth/2, overlay.clientHeight/2];
+
+  let closed = false;
+  const onKey = (e)=>{
+    const top = overlayStack[overlayStack.length-1]; if(!top || top.overlay !== overlay) return;
+    if(e.key === '+' || e.key === '='){ e.preventDefault(); zoomAt(...centre(), 1.5, true); }
+    else if(e.key === '-' || e.key === '_'){ e.preventDefault(); zoomAt(...centre(), 1/1.5, true); }
+    else if(e.key === '0'){ e.preventDefault(); resetZoom(); }
+  };
+  const onResize = ()=> apply(false);
+  const close = ()=>{
+    if(closed) return; closed = true;
+    document.removeEventListener('keydown', onKey); window.removeEventListener('resize', onResize);
+    overlay.classList.add('closing'); popOverlay(overlay);
+    /* drop the image data as soon as the viewer is gone so the full-res copy is not kept in memory */
+    setTimeout(()=>{ img.removeAttribute('src'); overlay.remove(); }, 200);
+    SFX.close();
+  };
   pushOverlay(overlay, close);
-  overlay.onclick = close;
+  document.addEventListener('keydown', onKey);
+  window.addEventListener('resize', onResize);
+  overlay.querySelector('.lightbox-close').onclick = close;
+  overlay.querySelectorAll('.lightbox-bar button').forEach(b=> b.onclick = ()=>{
+    const z = b.dataset.z;
+    if(z === 'in') zoomAt(...centre(), 1.5, true); else if(z === 'out') zoomAt(...centre(), 1/1.5, true); else resetZoom();
+  });
+
+  /* ---- gestures: wheel, drag to pan, pinch, double-tap / double-click ---- */
+  const insidePicture = (x, y)=>{
+    const r = img.getBoundingClientRect(), ar = (img.naturalWidth || 1) / (img.naturalHeight || 1);
+    let w = r.width, h = r.height; if(w/h > ar) w = h*ar; else h = w/ar;
+    return Math.abs(x - (r.left + r.width/2)) <= w/2 && Math.abs(y - (r.top + r.height/2)) <= h/2;
+  };
+  overlay.addEventListener('wheel', (e)=>{
+    e.preventDefault();
+    const dy = e.deltaMode === 1 ? e.deltaY*33 : e.deltaY;
+    zoomAt(e.clientX, e.clientY, Math.exp(-dy * (e.ctrlKey ? 0.01 : 0.0018)), false);
+  }, { passive:false });
+
+  const ptrs = new Map();
+  let pinch = null, moved = false, gesture = false, downOutside = false, lastTap = { t:0, x:0, y:0 };
+  overlay.addEventListener('pointerdown', (e)=>{
+    if(e.target.closest('.lightbox-bar, .lightbox-close')) return;
+    try{ overlay.setPointerCapture(e.pointerId); }catch(_){}
+    ptrs.set(e.pointerId, { x:e.clientX, y:e.clientY, sx:e.clientX, sy:e.clientY });
+    if(ptrs.size === 1){ moved = false; gesture = false; downOutside = !insidePicture(e.clientX, e.clientY); }
+    else { gesture = true; const [a, b] = [...ptrs.values()]; pinch = { d: Math.hypot(a.x-b.x, a.y-b.y) || 1, s }; }
+    if(s > 1) img.style.cursor = 'grabbing';
+  });
+  overlay.addEventListener('pointermove', (e)=>{
+    const p = ptrs.get(e.pointerId); if(!p) return;
+    const dx = e.clientX - p.x, dy = e.clientY - p.y; p.x = e.clientX; p.y = e.clientY;
+    if(ptrs.size >= 2 && pinch){
+      const [a, b] = [...ptrs.values()], d = Math.hypot(a.x-b.x, a.y-b.y) || 1;
+      zoomAt((a.x+b.x)/2, (a.y+b.y)/2, (pinch.s * d / pinch.d) / s, false);
+      moved = true; return;
+    }
+    if(Math.hypot(e.clientX-p.sx, e.clientY-p.sy) > 6) moved = true;
+    if(moved && s > 1){ tx += dx; ty += dy; apply(false); }
+  });
+  const endPointer = (e)=>{
+    if(!ptrs.has(e.pointerId)) return;
+    ptrs.delete(e.pointerId);
+    if(ptrs.size < 2) pinch = null;
+    if(ptrs.size) return;
+    img.style.cursor = s > 1 ? 'grab' : 'zoom-in';
+    if(e.type !== 'pointerup' || moved || gesture) return;
+    if(downOutside && !insidePicture(e.clientX, e.clientY)){ close(); return; }   /* tap on the dark area closes */
+    const now = performance.now();
+    if(now - lastTap.t < 320 && Math.hypot(e.clientX-lastTap.x, e.clientY-lastTap.y) < 30){
+      lastTap.t = 0;
+      if(s > 1.05) resetZoom(); else zoomAt(e.clientX, e.clientY, 3, true);
+    } else lastTap = { t:now, x:e.clientX, y:e.clientY };
+  };
+  overlay.addEventListener('pointerup', endPointer);
+  overlay.addEventListener('pointercancel', endPointer);
+
+  if(!opts.full && opts.tradeId && opts.key){
+    const status = document.createElement('span');
+    status.className = 'lightbox-status'; status.textContent = 'Loading full resolution…';
+    overlay.appendChild(status);
+    loadFullImage(opts.tradeId, opts.key).then(full=>{
+      if(closed) return;
+      if(full){ img.onload = ()=>{ status.remove(); }; img.src = full; }   /* zoom state is kept across the swap */
+      else { status.textContent = 'Full resolution unavailable'; setTimeout(()=>status.remove(), 1800); }
+    });
+  }
 }
 
 /* ============================= UI ENGINE ============================= */
@@ -1608,7 +1813,7 @@ function afterRender(root){
 }
 
 // Bottom-sheet drag-to-dismiss (mobile only)
-function enableSheetDrag(modal, onClose){
+function enableSheetDrag(modal, onClose, isDirty){
   const grab = modal.querySelector('.modal-grabber'); if(!grab) return;
   let startY=0, curY=0, dragging=false, startT=0;
   const onStart = (e)=>{
@@ -1627,8 +1832,8 @@ function enableSheetDrag(modal, onClose){
     if(!dragging) return; dragging=false;
     const dy = Math.max(0, curY-startY); const v = dy / Math.max(1, performance.now()-startT);
     modal.classList.remove('dragging');
-    if(dy>120 || v>0.6){ modal.style.setProperty('--drag', dy+'px'); haptic('light'); onClose(); }
-    else { modal.classList.add('snapback'); modal.style.transform='translateY(0)'; setTimeout(()=>{ modal.classList.remove('snapback'); modal.style.transform=''; }, 450); }
+    if((dy>120 || v>0.6) && !(isDirty && isDirty())){ modal.style.setProperty('--drag', dy+'px'); haptic('light'); onClose(); }
+    else { modal.classList.add('snapback'); modal.style.transform='translateY(0)'; setTimeout(()=>{ modal.classList.remove('snapback'); modal.style.transform=''; }, 450); if((dy>120 || v>0.6) && isDirty && isDirty()) onClose(); }
   };
   grab.addEventListener('touchstart', onStart, {passive:true});
   grab.addEventListener('touchmove', onMove, {passive:false});
@@ -1637,23 +1842,37 @@ function enableSheetDrag(modal, onClose){
   window.addEventListener('mousemove', onMove);
   window.addEventListener('mouseup', onEnd);
 }
-function makeOverlay(innerHtml, extraClass){
+function makeOverlay(innerHtml, extraClass, opts){
+  opts = opts || {};
   const overlay = document.createElement('div');
   overlay.className = 'overlay';
   overlay.innerHTML = `<div class="modal ${extraClass||''}"><div class="modal-grabber"></div>${innerHtml}</div>`;
   document.body.appendChild(overlay);
   const modal = overlay.querySelector('.modal');
   let closed = false;
+  /* close(): always closes. requestClose(): the "safe" path used by Esc, backdrop, swipe-down, X and Cancel —
+     if the dialog reports unsaved changes it asks before discarding them. */
   const close = ()=>{
     if(closed) return; closed = true;
     overlay.classList.add('closing'); popOverlay(overlay); SFX.close();
     setTimeout(()=> overlay.remove(), 260);
   };
-  pushOverlay(overlay, close);
-  overlay.onclick = (e)=>{ if(e.target===overlay) close(); };
-  enableSheetDrag(modal, close);
+  let asking = false;
+  const requestClose = async ()=>{
+    if(closed || asking) return;
+    if(opts.isDirty && opts.isDirty()){
+      asking = true;
+      const discard = await confirmDialog({ title:'Discard your changes?', message:'Everything you entered in this form will be lost.', okText:'Discard', cancelText:'Keep editing', danger:true });
+      asking = false;
+      if(!discard) return;
+    }
+    close();
+  };
+  pushOverlay(overlay, requestClose);
+  onBackdropClick(overlay, requestClose);
+  enableSheetDrag(modal, requestClose, opts.isDirty);
   SFX.open(); haptic('light');
-  return { overlay, modal, close };
+  return { overlay, modal, close, requestClose };
 }
 function hideSplash(){ const s = document.getElementById('splash'); if(s) s.classList.add('hidden'); }
 
@@ -1684,6 +1903,10 @@ function outcomeClass(t){
   if(t.outcome==='loss') return 'loss';
   return 'be';
 }
+/* Breakeven trades (be_win / be_loss) are neutral: they are left out of every trade COUNT and RATIO
+   (win rate, avg R, avg win/loss, expectancy, streaks, best/worst, per-group trade counts).
+   Only their optional "P&L beyond breakeven" dollars still count in money totals, because that is real cash. */
+function isBE(t){ return t.outcome==='be_win' || t.outcome==='be_loss'; }
 function outcomeBreakdownCounts(trades){
   let wins=0, losses=0, be=0;
   trades.forEach(t=>{ if(t.outcome==='be_win' || t.outcome==='be_loss') be++; else if(t.outcome==='win') wins++; else if(t.outcome==='loss') losses++; });
@@ -1724,38 +1947,41 @@ function filteredTrades(){
   return arr.sort((a,b)=> new Date(a.date) - new Date(b.date));
 }
 function computeStats(trades){
-  const n = trades.length;
-  const wins = trades.filter(t=>t.outClass==='win');
-  const losses = trades.filter(t=>t.outClass==='loss');
+  const counted = trades.filter(t=>t.outClass!=='be');       /* decisive trades only */
+  const n = counted.length;
+  const wins = counted.filter(t=>t.outClass==='win');
+  const losses = counted.filter(t=>t.outClass==='loss');
   const bes = trades.filter(t=>t.outClass==='be');
   const grossWin = wins.reduce((s,t)=>s+t.pnl,0);
   const grossLoss = Math.abs(losses.reduce((s,t)=>s+t.pnl,0));
-  const net = trades.reduce((s,t)=>s+t.pnl,0);
+  const net = trades.reduce((s,t)=>s+t.pnl,0);               /* money: includes any breakeven adjustment */
+  const countedNet = counted.reduce((s,t)=>s+t.pnl,0);
   const winRate = n ? (wins.length/n*100) : 0;
   const avgWin = wins.length ? grossWin/wins.length : 0;
   const avgLoss = losses.length ? grossLoss/losses.length : 0;
-  const expectancy = n ? net/n : 0;
-  const avgR = n ? trades.reduce((s,t)=>s+t.r,0)/n : 0;
-  const best = n ? Math.max(...trades.map(t=>t.pnl)) : 0;
-  const worst = n ? Math.min(...trades.map(t=>t.pnl)) : 0;
+  const expectancy = n ? countedNet/n : 0;
+  const avgR = n ? counted.reduce((s,t)=>s+t.r,0)/n : 0;
+  const best = n ? Math.max(...counted.map(t=>t.pnl)) : 0;
+  const worst = n ? Math.min(...counted.map(t=>t.pnl)) : 0;
   let curStreak=0, curType=null, bestWinStreak=0, worstLossStreak=0, tmpW=0, tmpL=0;
-  trades.forEach(t=>{
+  counted.forEach(t=>{
     if(t.outClass==='win'){ tmpW++; tmpL=0; bestWinStreak=Math.max(bestWinStreak,tmpW); }
-    else if(t.outClass==='loss'){ tmpL++; tmpW=0; worstLossStreak=Math.max(worstLossStreak,tmpL); }
+    else { tmpL++; tmpW=0; worstLossStreak=Math.max(worstLossStreak,tmpL); }
   });
-  for(let i=trades.length-1;i>=0;i--){
-    const o = trades[i].outClass; if(o==='be') break;
+  for(let i=counted.length-1;i>=0;i--){
+    const o = counted[i].outClass;
     if(curType===null){ curType=o; curStreak=1; } else if(o===curType){ curStreak++; } else break;
   }
   return { n, wins:wins.length, losses:losses.length, be:bes.length, net, winRate, avgWin, avgLoss, expectancy, avgR, best, worst, curStreak, curType, bestWinStreak, worstLossStreak, grossWin, grossLoss };
 }
 function groupBy(trades, keyFn){ const map = {}; trades.forEach(t=>{ const k = keyFn(t); if(!map[k]) map[k]=[]; map[k].push(t); }); return map; }
 function statRow(label, t){
-  const win = t.filter(x=>x.outClass==='win').length;
+  const d = t.filter(x=>x.outClass!=='be');                  /* breakeven trades are ignored for counts / ratios */
+  const win = d.filter(x=>x.outClass==='win').length;
   const net = t.reduce((s,x)=>s+x.pnl,0);
-  const avgR = t.length ? t.reduce((s,x)=>s+x.r,0)/t.length : 0;
-  const wr = t.length ? (win/t.length*100) : 0;
-  return {label, count:t.length, net, wr, avgR};
+  const avgR = d.length ? d.reduce((s,x)=>s+x.r,0)/d.length : 0;
+  const wr = d.length ? (win/d.length*100) : 0;
+  return {label, count:d.length, all:t.length, empty:d.length===0, net, wr, avgR};
 }
 function monthKey(dateStr){ return dateStr.slice(0,7); }
 function monthLabel(key){ const parts = key.split('-'); return MONTH_ABBR[parseInt(parts[1],10)-1] + ' ' + parts[0]; }
@@ -1763,8 +1989,9 @@ function monthlyStats(trades){
   const g = groupBy(trades, t=>monthKey(t.date));
   return Object.keys(g).sort().map(k=>{
     const arr = g[k]; const net = arr.reduce((s,t)=>s+t.pnl,0);
-    const win = arr.filter(t=>t.outClass==='win').length;
-    return { key:k, label: monthLabel(k), count: arr.length, net, wr: arr.length ? (win/arr.length*100) : 0 };
+    const counted = arr.filter(t=>t.outClass!=='be');
+    const win = counted.filter(t=>t.outClass==='win').length;
+    return { key:k, label: monthLabel(k), count: counted.length, net, wr: counted.length ? (win/counted.length*100) : 0 };
   });
 }
 function prettyDate(dateStr){ const d = new Date(dateStr+'T00:00:00'); return DOW_SHORT[d.getDay()]+', '+MONTH_ABBR[d.getMonth()]+' '+d.getDate()+', '+d.getFullYear(); }
@@ -1832,13 +2059,33 @@ function drawEquityChart(trades, canvasId){
       scales:{ x:{grid:{display:false}, border:{display:false}, ticks:{maxTicksLimit:7, color:cssVar('--text-3'),font:{size:10}}},
                y:{grid:{color:cssVar('--sep')}, border:{display:false}, ticks:{callback:(v)=>'$'+v, color:cssVar('--text-3'),font:{size:10.5}, maxTicksLimit:6}} } } });
 }
+/* Slice colours must be OPAQUE: a translucent slice (the old breakeven colour) fades further on hover and
+   looks like it disappears. Hover colour is pinned to the normal colour so hovering never recolours a slice. */
+const BE_LOSS_COLOR = '#7a7f9a';
+function donutColors(key){
+  const gain = cssVar('--gain'), loss = cssVar('--loss'), accent = cssVar('--accent');
+  return key==='wl' ? [gain, loss] : [gain, loss, accent, BE_LOSS_COLOR];
+}
+function syncDonutLegend(chart){
+  const box = chart.canvas.closest('.donut-wrap'); if(!box) return;
+  const el = box.querySelector('.chart-legend'); if(!el) return;
+  const cols = chart.data.datasets[0].backgroundColor;
+  el.innerHTML = chart.data.labels.map((l,i)=>`<button type="button" class="cl-item ${chart.getDataVisibility(i)?'':'off'}" data-i="${i}" data-silent><span class="cl-dot" style="background:${cols[i]}"></span>${escapeHtml(l)}</button>`).join('');
+  el.querySelectorAll('.cl-item').forEach(b=> b.onclick = ()=>{ chart.toggleDataVisibility(parseInt(b.dataset.i,10)); chart.update(); syncDonutLegend(chart); });
+}
+function donutOptions(cutout){
+  return { responsive:true, maintainAspectRatio:false, cutout, layout:{ padding:12 },
+    plugins:{ legend:{ display:false } } };
+}
 function drawWLDonut(trades){
   chartDefaults(); destroyChart('wl');
   const ctx = document.getElementById('chartWL'); if(!ctx) return;
-  const { wins, losses, be } = outcomeBreakdownCounts(trades);
+  const { wins, losses } = outcomeBreakdownCounts(trades);
+  const cols = donutColors('wl');
   charts.wl = new Chart(ctx, { type:'doughnut',
-    data:{ labels:['Wins','Losses','Breakeven'], datasets:[{ data:[wins,losses,be], backgroundColor:[cssVar('--gain'),cssVar('--loss'),cssVar('--fill-2')], borderWidth:0, hoverOffset:8, borderRadius:6, spacing:3 }]},
-    options:{ responsive:true, maintainAspectRatio:false, cutout:'72%', plugins:{ legend:{ position:'bottom', labels:{ boxWidth:8, boxHeight:8, usePointStyle:true, pointStyle:'circle', padding:16, font:{size:11.5,weight:'600'} } } } } });
+    data:{ labels:['Wins','Losses'], datasets:[{ data:[wins,losses], backgroundColor:cols, hoverBackgroundColor:cols, hoverBorderWidth:0, borderWidth:0, hoverOffset:8, borderRadius:6, spacing:3 }]},
+    options: donutOptions('72%') });
+  syncDonutLegend(charts.wl);
 }
 function drawDowChart(trades, canvasId){
   const order = [1,2,3,4,5,6,0];
@@ -1981,11 +2228,12 @@ function renderCategoryOverviewCards(){
     ${cats.map(c=>{
       const arr = categoryTrades(c).map(withDerived);
       const net = arr.reduce((s,t)=>s+t.pnl,0);
+      const counted = arr.filter(t=>t.outClass!=='be').length;
       return `<div class="kpi-card cat-card ${state.category===c?'active':''}" data-cat="${c}" data-silent>
         <div class="tag">${tag[c]}</div>
         <div class="lbl">Total earned</div>
         <div class="val num ${colorForPnl(net)}" data-count="${net}" data-sign="1" data-key="cat_${c}">${fmtMoney(net,true)}</div>
-        <div class="sub">${arr.length} trade${arr.length===1?'':'s'}</div>
+        <div class="sub">${counted} trade${counted===1?'':'s'}</div>
       </div>`;
     }).join('')}
   </div>`;
@@ -2017,7 +2265,7 @@ function renderBestMonthCard(trades){
      </div>`;
 }
 function renderQuickInsights(trades){
-  const summarize = (keyFn)=>Object.entries(groupBy(trades,keyFn)).map(([label,arr])=>statRow(label,arr)).sort((a,b)=>b.avgR-a.avgR);
+  const summarize = (keyFn)=>Object.entries(groupBy(trades,keyFn)).map(([label,arr])=>statRow(label,arr)).filter(r=>r.count>0).sort((a,b)=>b.avgR-a.avgR);
   const models = summarize(t=>t.model);
   const days = summarize(t=>DOW_SHORT[t.dow]);
   const leaks = [...models].sort((a,b)=>a.avgR-b.avgR);
@@ -2076,8 +2324,8 @@ function renderDashboard(main){
      </div>
      <div class="panel-grid halves">
        <div class="panel">
-         ${panelHeading('analytics','Outcome breakdown',`Win / loss / breakeven across ${s.n} trades`)}
-         <div class="chart-wrap" style="height:250px;"><canvas id="chartWL"></canvas></div>
+         ${panelHeading('analytics','Outcome breakdown',`Wins vs losses across ${s.n} trade${s.n===1?'':'s'} · breakeven excluded`)}
+         <div class="chart-wrap donut-wrap" style="height:270px;"><div class="donut-canvas"><canvas id="chartWL"></canvas></div><div class="chart-legend"></div></div>
        </div>
        <div class="panel">
          ${panelHeading('calendar','P&amp;L by day of week','Which weekday has been your best')}
@@ -2324,7 +2572,7 @@ function renderAnalytics(main){
      </div>
      <div class="panel-grid halves">
        <div class="panel">${panelHeading('analytics','P&amp;L by model',MODELS.join(', '))}<div class="chart-wrap" style="height:230px;"><canvas id="chartModel"></canvas></div></div>
-       <div class="panel">${panelHeading('chart','Outcome type distribution','Win / loss / breakeven→win / breakeven→loss')}<div class="chart-wrap" style="height:230px;"><canvas id="chartOutcome"></canvas></div></div>
+       <div class="panel">${panelHeading('chart','Outcome type distribution','Win / loss / breakeven→win / breakeven→loss')}<div class="chart-wrap donut-wrap" style="height:270px;"><div class="donut-canvas"><canvas id="chartOutcome"></canvas></div><div class="chart-legend"></div></div></div>
      </div>
      <div class="section-title">Breakdown</div>
      <div class="panel">
@@ -2352,10 +2600,11 @@ function renderDimTable(trades, dimKey){
   let labels = Object.keys(g);
   if(dim.order){ labels = dim.order.filter(l=>g[l]); Object.keys(g).forEach(l=>{ if(!labels.includes(l)) labels.push(l); }); }
   else if(dimKey==='rr'){ labels = labels.sort((a,b)=> parseFloat(a)-parseFloat(b)); }
-  const rows = labels.map(l=>statRow(l, g[l]));
+  const isOutcomeDim = dimKey==='outcome';   /* the outcome table is a distribution, so it keeps showing breakeven counts */
+  const rows = labels.map(l=>statRow(l, g[l])).filter(r=> isOutcomeDim || r.count>0 || r.net!==0);
   if(!rows.length) return `<p style="color:var(--text-3);font-size:12.5px;">No data yet.</p>`;
   return `<div class="table-scroll"><table><thead><tr><th>${dim.label}</th><th>Trades</th><th>Win %</th><th>Avg R</th><th>Net</th></tr></thead><tbody>
-    ${rows.map(r=>`<tr><td style="font-weight:600;">${r.label}</td><td class="num">${r.count}</td><td class="num">${fmtPct(r.wr)}</td><td class="num">${r.avgR.toFixed(2)}</td><td class="num ${colorForPnl(r.net)}" style="font-weight:700;">${fmtMoney(r.net,true)}</td></tr>`).join('')}
+    ${rows.map(r=>`<tr><td style="font-weight:600;">${r.label}</td><td class="num">${isOutcomeDim ? r.all : r.count}</td><td class="num">${r.empty?'—':fmtPct(r.wr)}</td><td class="num">${r.empty?'—':r.avgR.toFixed(2)}</td><td class="num ${colorForPnl(r.net)}" style="font-weight:700;">${fmtMoney(r.net,true)}</td></tr>`).join('')}
   </tbody></table></div>`;
 }
 function drawDimBarChart(trades, dimKey, canvasId, order){
@@ -2369,9 +2618,11 @@ function drawOutcomeChart(trades){
   const ctx = document.getElementById('chartOutcome'); if(!ctx) return;
   const g = groupBy(trades, t=>t.outcome);
   const keys = Object.keys(OUTCOMES);
+  const cols = donutColors('outcome');
   charts.outcome = new Chart(ctx, { type:'doughnut',
-    data:{ labels: keys.map(k=>OUTCOMES[k].label), datasets:[{ data: keys.map(k=> (g[k]||[]).length), backgroundColor:[cssVar('--gain'),cssVar('--loss'),cssVar('--accent'),cssVar('--fill-2')], borderWidth:0, hoverOffset:8, borderRadius:6, spacing:3 }]},
-    options:{ responsive:true, maintainAspectRatio:false, cutout:'68%', plugins:{ legend:{ position:'bottom', labels:{ boxWidth:8, boxHeight:8, usePointStyle:true, pointStyle:'circle', padding:14, font:{size:11,weight:'600'} } } } } });
+    data:{ labels: keys.map(k=>OUTCOMES[k].label), datasets:[{ data: keys.map(k=> (g[k]||[]).length), backgroundColor:cols, hoverBackgroundColor:cols, hoverBorderWidth:0, borderWidth:0, hoverOffset:8, borderRadius:6, spacing:3 }]},
+    options: donutOptions('68%') });
+  syncDonutLegend(charts.outcome);
 }
 
 /* ============================= CALENDAR ============================= */
@@ -2575,17 +2826,23 @@ function renderSettings(main){
 }
 
 /* ============================= MODAL: ADD / EDIT TRADE ============================= */
-function readAndCompressImage(file){
+/* One image per screenshot slot: a single high-quality copy stored with the trade (no separate thumbnail). */
+const IMG_MAX_DIM = 2560;     /* longest side in px — raise this for more detail, lower it for a lighter journal */
+const IMG_QUALITY = 0.85;     /* JPEG quality */
+function readImage(file){
   return new Promise((resolve, reject)=>{
     const reader = new FileReader();
     reader.onload = (e)=>{
       const img = new Image();
       img.onload = ()=>{
-        const maxW = 720; const scale = Math.min(1, maxW / img.width);
-        const w = Math.max(1, Math.round(img.width * scale)); const h = Math.max(1, Math.round(img.height * scale));
-        const canvas = document.createElement('canvas'); canvas.width = w; canvas.height = h;
-        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-        resolve(canvas.toDataURL('image/jpeg', 0.72));
+        const W = img.naturalWidth || img.width, H = img.naturalHeight || img.height;
+        const sc = Math.min(1, IMG_MAX_DIM / Math.max(W, H));
+        const w = Math.max(1, Math.round(W*sc)), h = Math.max(1, Math.round(H*sc));
+        const c = document.createElement('canvas'); c.width = w; c.height = h;
+        c.getContext('2d').drawImage(img, 0, 0, w, h);
+        let out = c.toDataURL('image/jpeg', IMG_QUALITY);
+        if(out.length > 4000000) out = c.toDataURL('image/jpeg', 0.72);   /* rare: very detailed images */
+        resolve(out);
       };
       img.onerror = ()=>reject(new Error('bad image'));
       img.src = e.target.result;
@@ -2617,7 +2874,9 @@ function openTradeModal(id){
   };
   const jType = t.journalType==='backtest' ? 'backtest' : 'live';
   const imgState = { imgLow: t.imgLow||null, imgMid: t.imgMid||null, imgHigh: t.imgHigh||null };
-  const { overlay, modal, close } = makeOverlay(`
+  let formDirty = false;          /* becomes true as soon as anything in the form is touched */
+  const touched = {};             /* slots whose image was replaced or removed in this session */
+  const { overlay, modal, close, requestClose } = makeOverlay(`
       <div class="modal-head"><h2>${existing?'Edit trade':'Log a trade'}</h2><button class="close-x" id="modalClose" aria-label="Close">${ICONS.x}</button></div>
       <div class="form-grid">
         <div class="form-field"><label>Date</label><input type="date" id="fDate" value="${t.date}"><span class="dow-hint" id="dowHint"></span></div>
@@ -2666,13 +2925,16 @@ function openTradeModal(id){
         <button class="btn-secondary" id="modalCancel">Cancel</button>
         <button class="btn-primary" id="modalSave">${existing?'Save changes':'Log trade'}</button>
       </div>
-  `);
+  `, '', { isDirty: ()=>formDirty });
   mountToggleRows(modal);
+  modal.addEventListener('input', ()=>{ formDirty = true; });
+  modal.addEventListener('change', ()=>{ formDirty = true; });
 
   let dirVal = t.direction, jTypeVal = jType, demoVal = t.demo || 'no', po3UsedVal = t.po3Used || 'yes';
   const bindToggle = (attr, setter, after)=>{
     overlay.querySelectorAll(`[data-${attr}]`).forEach(b=>{
       b.onclick = ()=>{
+        formDirty = true;
         setter(b.dataset[attr]);
         const row = b.closest('.toggle-row');
         row.querySelectorAll('.toggle-btn').forEach(x=>x.classList.toggle('active', x===b));
@@ -2691,14 +2953,18 @@ function openTradeModal(id){
     overlay.querySelectorAll(`[data-imginput="${key}"]`).forEach(input=>{
       input.onchange = async (e)=>{
         const file = e.target.files[0]; if(!file) return;
-        try{ imgState[key] = await readAndCompressImage(file); refreshImgSlot(key, label); SFX.pop(); haptic('light'); }
+        try{ imgState[key] = await readImage(file); touched[key] = true; formDirty = true; refreshImgSlot(key, label); SFX.pop(); haptic('light'); }
         catch(err){ SFX.error(); alertDialog('Could not read that image', 'Try a different file.'); }
       };
     });
     const rm = overlay.querySelector(`[data-imgremove="${key}"]`);
-    if(rm) rm.onclick = ()=>{ imgState[key] = null; refreshImgSlot(key, label); SFX.swoosh(); };
+    if(rm) rm.onclick = ()=>{ imgState[key] = null; touched[key] = true; formDirty = true; refreshImgSlot(key, label); SFX.swoosh(); };
     const thumb = overlay.querySelector(`.img-slot-thumb[data-view="${key}"]`);
-    if(thumb) thumb.onclick = ()=> openImageLightbox(imgState[key]);
+    if(thumb) thumb.onclick = ()=>{
+      /* legacy two-copy image that has not been merged yet: the viewer can still fetch its sharp copy */
+      if(!touched[key] && existing && existing.fullImgs && existing.fullImgs[key]) openImageLightbox(imgState[key], { tradeId: existing.id, key });
+      else openImageLightbox(imgState[key]);
+    };
   }
   function refreshImgSlot(key, label){
     const el = document.getElementById('imgSlot_'+key);
@@ -2730,8 +2996,8 @@ function openTradeModal(id){
   document.getElementById('fRR').oninput = updatePreview;
   document.getElementById('fRisk').oninput = updatePreview;
 
-  document.getElementById('modalClose').onclick = close;
-  document.getElementById('modalCancel').onclick = close;
+  document.getElementById('modalClose').onclick = requestClose;
+  document.getElementById('modalCancel').onclick = requestClose;
   modal.addEventListener('keydown', (e)=>{ if((e.metaKey||e.ctrlKey) && e.key==='Enter'){ e.preventDefault(); document.getElementById('modalSave').click(); } });
   document.getElementById('modalSave').onclick = async ()=>{
     const dateVal = document.getElementById('fDate').value;
@@ -2761,6 +3027,14 @@ function openTradeModal(id){
       notes: document.getElementById('fNotes').value.trim(),
       imgLow: imgState.imgLow, imgMid: imgState.imgMid, imgHigh: imgState.imgHigh,
     };
+    /* Only relevant for older two-copy images that have not been merged yet: keep their flag if untouched. */
+    const legacy = {}, staleKeys = [];
+    TF_SLOTS.forEach(sl=>{
+      const k = sl.key, had = !!(existing && existing.fullImgs && existing.fullImgs[k]);
+      if(!had) return;
+      if(touched[k]) staleKeys.push(k); else if(imgState[k]) legacy[k] = true;
+    });
+    if(Object.keys(legacy).length) record.fullImgs = legacy;
     if(existing){ const idx = state.trades.findIndex(x=>x.id===existing.id); state.trades[idx] = record; }
     else { state.trades.push(record); }
     const journalChanged = record.journalType !== state.journal;
@@ -2772,15 +3046,16 @@ function openTradeModal(id){
     saveTrades();
     if(journalChanged) saveSettings();
     toast(existing ? 'Trade updated' : `Trade logged · ${fmtMoney(pnl,true)}`, pnl<0 ? 'info' : 'ok');
+    staleKeys.forEach(k=> storageDelete(fullImgKey(record.id, k)));
   };
   setTimeout(()=>{ if(!isMobile()){ const first = modal.querySelector('#fDate'); if(first) first.focus({preventScroll:true}); } }, 300);
 }
 
 /* ============================= MODAL: TRADE DETAIL ============================= */
 function detailItem(label, val){ return `<div class="detail-item"><div class="detail-item-lbl">${label}</div><div class="detail-item-val">${val}</div></div>`; }
-function detailImgCard(label, src){
+function detailImgCard(label, src, key){
   if(!src) return `<div class="detail-img-card"><div class="detail-img-lbl">${label}</div><div class="img-slot-empty" style="height:80px;">${ICONS.image}<span>No image</span></div></div>`;
-  return `<div class="detail-img-card"><div class="detail-img-lbl">${label}</div><img src="${src}" class="detail-img-thumb"></div>`;
+  return `<div class="detail-img-card"><div class="detail-img-lbl">${label}</div><img src="${src}" class="detail-img-thumb" data-key="${key}"></div>`;
 }
 function openTradeDetail(id){
   const raw = state.trades.find(x=>x.id===id);
@@ -2814,7 +3089,7 @@ function openTradeDetail(id){
       </div>
       <div class="detail-block"><div class="detail-block-lbl">Psychology / mental state</div><div class="detail-block-text">${escapeHtml(t.psych||'—')}</div></div>
       <div class="detail-block"><div class="detail-block-lbl">Notes</div><div class="detail-block-text">${escapeHtml(t.notes||'—')}</div></div>
-      <div class="detail-block"><div class="detail-block-lbl">Chart screenshots</div><div class="detail-imgs">${TF_SLOTS.map(s=>detailImgCard(s.label, t[s.key])).join('')}</div></div>
+      <div class="detail-block"><div class="detail-block-lbl">Chart screenshots</div><div class="detail-imgs">${TF_SLOTS.map(s=>detailImgCard(s.label, t[s.key], s.key)).join('')}</div></div>
       <div class="modal-foot">
         <button class="btn-ghost btn-danger" id="detailDeleteBtn" style="margin-right:auto;">${ICONS.trash.replace('<svg','<svg width="14" height="14"')} Delete</button>
         <button class="btn-secondary" id="detailCloseBtn">Close</button>
@@ -2825,7 +3100,7 @@ function openTradeDetail(id){
   document.getElementById('detailCloseBtn').onclick = close;
   document.getElementById('detailEditBtn').onclick = ()=>{ close(); setTimeout(()=>openTradeModal(id), 120); };
   document.getElementById('detailDeleteBtn').onclick = async ()=>{ close(); await new Promise(r=>setTimeout(r,150)); deleteTrade(id); };
-  overlay.querySelectorAll('.detail-img-thumb').forEach(img=>{ img.onclick = ()=> openImageLightbox(img.src); });
+  overlay.querySelectorAll('.detail-img-thumb').forEach(img=>{ img.onclick = ()=>{ const k = img.dataset.key; openImageLightbox(img.src, (t.fullImgs && t.fullImgs[k]) ? { tradeId: id, key: k } : undefined); }; });
 }
 
 /* ============================= INIT ============================= */
@@ -2838,6 +3113,7 @@ function openTradeDetail(id){
     render();
     subscribeRealtime();
     hideSplash();
+    setTimeout(async ()=>{ await migrateLegacyFullImages(); await cleanupOrphanFullImages(); }, 4000);
     let lastMobile = isMobile();
     window.addEventListener('resize', ()=>{ const m = isMobile(); if(m!==lastMobile){ lastMobile = m; renderMain(); } });
     if('serviceWorker' in navigator){ navigator.serviceWorker.register('sw.js').catch(()=>{}); }
