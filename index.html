@@ -2073,6 +2073,55 @@ function syncDonutLegend(chart){
   el.innerHTML = chart.data.labels.map((l,i)=>`<button type="button" class="cl-item ${chart.getDataVisibility(i)?'':'off'}" data-i="${i}" data-silent><span class="cl-dot" style="background:${cols[i]}"></span>${escapeHtml(l)}</button>`).join('');
   el.querySelectorAll('.cl-item').forEach(b=> b.onclick = ()=>{ chart.toggleDataVisibility(parseInt(b.dataset.i,10)); chart.update(); syncDonutLegend(chart); });
 }
+/* Custom ring drawing. Chart.js's built-in `spacing` makes gaps depend on slice size / rounded corners and
+   still reserves room for empty slices, so gaps came out uneven. Here every boundary gets the SAME fixed-width
+   parallel gap (GAP px) and the same rounded corners (RADIUS px). Chart.js still handles data, hover and tooltips. */
+const DONUT_GAP = 4, DONUT_RADIUS = 6;
+function drawRingSlice(ctx, cx, cy, R, ir, a0, a1){
+  const d = DONUT_GAP/2;
+  const w = ir * Math.min(a1 - a0, 2);                                   /* rough width of the slice at its inner edge */
+  if(w - 2*d < 1.5) return;                                              /* too thin to show next to a gap */
+  const rr = Math.max(0, Math.min(DONUT_RADIUS, (R - ir)/2 - 0.5, (w - 2*d)/2 - 0.5));
+  const dd = d + rr;
+  const xo = Math.sqrt(Math.max(0, (R - rr)*(R - rr) - dd*dd));          /* outer fillet centres, along each edge */
+  const xi = Math.sqrt(Math.max(0, (ir + rr)*(ir + rr) - dd*dd));        /* inner fillet centres */
+  const loc = (x, y, a)=>[cx + x*Math.cos(a) - y*Math.sin(a), cy + x*Math.sin(a) + y*Math.cos(a)];
+  const Co0 = loc(xo, dd, a0), Ci0 = loc(xi, dd, a0), Co1 = loc(xo, -dd, a1), Ci1 = loc(xi, -dd, a1);
+  const ao0 = a0 + Math.atan2(dd, xo), ai0 = a0 + Math.atan2(dd, xi);
+  const ao1 = a1 - Math.atan2(dd, xo), ai1 = a1 - Math.atan2(dd, xi);
+  ctx.beginPath();
+  ctx.arc(cx, cy, R, ao0, ao1, false);                                   /* outer edge */
+  ctx.arc(Co1[0], Co1[1], rr, ao1, a1 + Math.PI/2, false);               /* rounded corner */
+  ctx.arc(Ci1[0], Ci1[1], rr, a1 + Math.PI/2, ai1 + Math.PI, false);     /* (straight edge is drawn between) */
+  ctx.arc(cx, cy, ir, ai1, ai0, true);                                   /* inner edge */
+  ctx.arc(Ci0[0], Ci0[1], rr, ai0 + Math.PI, a0 + 1.5*Math.PI, false);
+  ctx.arc(Co0[0], Co0[1], rr, a0 - Math.PI/2, ao0, false);
+  ctx.closePath(); ctx.fill();
+}
+const donutRingPlugin = {
+  id: 'donutRing',
+  beforeDatasetDraw(chart, args){
+    if(chart.config.type !== 'doughnut') return;
+    const ds = chart.data.datasets[args.index], ctx = chart.ctx;
+    const items = [];
+    args.meta.data.forEach((arc, i)=>{
+      const p = arc.getProps(['startAngle','endAngle','innerRadius','outerRadius','x','y']);
+      if(p.endAngle - p.startAngle > 1e-4) items.push({ arc, p, i });    /* empty / hidden slices are skipped entirely */
+    });
+    items.forEach(({arc, p, i})=>{
+      const mid = (p.startAngle + p.endAngle)/2, off = arc.options.offset || 0;
+      ctx.save();
+      ctx.translate(Math.cos(mid)*off, Math.sin(mid)*off);               /* hover pop-out */
+      ctx.fillStyle = Array.isArray(ds.backgroundColor) ? ds.backgroundColor[i] : ds.backgroundColor;
+      if(items.length === 1){                                            /* one slice = plain full ring, no gap */
+        ctx.beginPath(); ctx.arc(p.x, p.y, p.outerRadius, 0, Math.PI*2); ctx.moveTo(p.x + p.innerRadius, p.y);
+        ctx.arc(p.x, p.y, p.innerRadius, 0, Math.PI*2, true); ctx.fill('evenodd');
+      } else drawRingSlice(ctx, p.x, p.y, p.outerRadius, p.innerRadius, p.startAngle, p.endAngle);
+      ctx.restore();
+    });
+    return false;                                                        /* skip Chart.js's own arc drawing */
+  }
+};
 function donutOptions(cutout){
   return { responsive:true, maintainAspectRatio:false, cutout, layout:{ padding:12 },
     plugins:{ legend:{ display:false } } };
@@ -2083,8 +2132,8 @@ function drawWLDonut(trades){
   const { wins, losses } = outcomeBreakdownCounts(trades);
   const cols = donutColors('wl');
   charts.wl = new Chart(ctx, { type:'doughnut',
-    data:{ labels:['Wins','Losses'], datasets:[{ data:[wins,losses], backgroundColor:cols, hoverBackgroundColor:cols, hoverBorderWidth:0, borderWidth:0, hoverOffset:8, borderRadius:6, spacing:3 }]},
-    options: donutOptions('72%') });
+    data:{ labels:['Wins','Losses'], datasets:[{ data:[wins,losses], backgroundColor:cols, hoverBackgroundColor:cols, hoverBorderWidth:0, borderWidth:0, hoverOffset:8, borderRadius:0, spacing:0 }]},
+    options: donutOptions('72%'), plugins:[donutRingPlugin] });
   syncDonutLegend(charts.wl);
 }
 function drawDowChart(trades, canvasId){
@@ -2620,8 +2669,8 @@ function drawOutcomeChart(trades){
   const keys = Object.keys(OUTCOMES);
   const cols = donutColors('outcome');
   charts.outcome = new Chart(ctx, { type:'doughnut',
-    data:{ labels: keys.map(k=>OUTCOMES[k].label), datasets:[{ data: keys.map(k=> (g[k]||[]).length), backgroundColor:cols, hoverBackgroundColor:cols, hoverBorderWidth:0, borderWidth:0, hoverOffset:8, borderRadius:6, spacing:3 }]},
-    options: donutOptions('68%') });
+    data:{ labels: keys.map(k=>OUTCOMES[k].label), datasets:[{ data: keys.map(k=> (g[k]||[]).length), backgroundColor:cols, hoverBackgroundColor:cols, hoverBorderWidth:0, borderWidth:0, hoverOffset:8, borderRadius:0, spacing:0 }]},
+    options: donutOptions('68%'), plugins:[donutRingPlugin] });
   syncDonutLegend(charts.outcome);
 }
 
