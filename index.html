@@ -2245,10 +2245,10 @@ function render(){
       ${mobileNavItem('rulebook','Rules','rulebook')}
       ${mobileNavItem('settings','Settings','settings')}
     </nav>
-    <button class="mobile-fab" id="mobileFab" aria-label="Log a trade" data-silent>${ICONS.plus}</button>
+    <button class="mobile-fab" id="mobileFab" aria-label="Add" data-silent>${ICONS.plus}</button>
   `;
   document.getElementById('btnAddSidebar').onclick = ()=>openTradeModal();
-  document.getElementById('mobileFab').onclick = ()=>{ SFX.pop(); haptic('medium'); openTradeModal(); };
+  document.getElementById('mobileFab').onclick = ()=>{ SFX.pop(); haptic('medium'); if(isMobile() && state.activeTab==='rulebook') openRuleModal(); else openTradeModal(); };
   document.getElementById('themeSwitch').onclick = (e)=> toggleTheme(e);
    app.querySelectorAll('.nav-item, .mobile-nav-item').forEach(el=>{
      el.onclick = ()=> goTab(el.dataset.tab);
@@ -2263,6 +2263,7 @@ function renderShellState(){
   document.querySelectorAll('.nav-item, .mobile-nav-item').forEach(el=>{ const active=el.dataset.tab===state.activeTab; el.classList.toggle('active',active); el.setAttribute('aria-current',active?'page':'false'); });
   const sw = document.getElementById('themeSwitch'); if(sw) sw.classList.toggle('on', state.settings.theme==='dark');
   const ti = document.getElementById('themeIcon'); if(ti) ti.innerHTML = state.settings.theme==='dark' ? ICONS.moon : ICONS.sun;
+  const fab = document.getElementById('mobileFab'); if(fab) fab.setAttribute('aria-label', state.activeTab==='rulebook' ? 'Add rule' : 'Log a trade');
   placeNavIndicator(true);
 }
 function goTab(tab){
