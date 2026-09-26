@@ -982,6 +982,17 @@
   .rule-actions{display:flex;gap:2px;}
   .toggle-btn.take.active{color:var(--gain);}
   .toggle-btn.avoid.active{color:var(--loss);}
+  .rb-img-field label{display:flex;align-items:center;gap:7px;}
+  .rb-img-optional{font-size:10.5px;font-weight:600;color:var(--text-3);text-transform:none;letter-spacing:0;background:var(--fill);padding:1px 7px;border-radius:999px;}
+  .rb-img-row{display:flex;align-items:center;gap:12px;min-height:60px;}
+  .rb-img-thumb{width:56px;height:56px;border-radius:12px;object-fit:cover;cursor:zoom-in;flex-shrink:0;transition:transform .3s var(--spring);border:1px solid var(--sep);}
+  .rb-img-thumb:hover{transform:scale(1.05);}
+  .rb-img-empty{width:56px;height:56px;border-radius:12px;background:var(--fill);border:1.5px dashed var(--sep-strong);display:flex;align-items:center;justify-content:center;color:var(--text-3);flex-shrink:0;cursor:pointer;transition:border-color .2s,color .2s;}
+  .rb-img-empty:hover{border-color:var(--text-3);color:var(--text-2);}
+  .rb-img-empty svg{width:19px;height:19px;opacity:.7;}
+  .rb-img-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+  .rb-img-actions .btn-ghost{font-size:11.5px;padding:6px 12px;}
+  .rb-img-hint{font-size:11.5px;color:var(--text-3);line-height:1.4;max-width:280px;}
   @media (max-width:780px){
     .rb-stats{grid-template-columns:1fr 1fr;}
     .rb-stats .kpi-hero{grid-column:1/-1;}
@@ -1236,6 +1247,14 @@ function subscribeRealtime(){
         if(v) state.settings = Object.assign(state.settings, JSON.parse(v));
         applyTheme(state.settings.theme);
         renderShellState(); renderMain();
+      } else if(key==='rulebook'){
+        const v = await storageGet('rulebook');
+        const incoming = v ? JSON.parse(v) : [];
+        if(JSON.stringify(incoming) !== JSON.stringify(rb.rules)){
+          rb.rules = incoming;
+          if(state.activeTab==='rulebook') renderMain();
+          toast('Rulebook synced from another device', 'info');
+        }
       }
     })
     .subscribe();
@@ -1275,6 +1294,7 @@ async function loadData(){
   const symbolMigration = { 'NQ1!':'NQ', 'ES1!':'ES' };
   state.trades.forEach(t=>{ if(symbolMigration[t.symbol]) t.symbol = symbolMigration[t.symbol]; });
   try{ const v2 = await storageGet('settings'); if(v2) state.settings = Object.assign(state.settings, JSON.parse(v2)); }catch(e){}
+  try{ const vr = await storageGet('rulebook'); rb.rules = vr ? JSON.parse(vr) : []; }catch(e){ rb.rules = []; }
   state.journal = state.settings.lastJournal === 'backtest' ? 'backtest' : 'live';
   state.category = ['real','demo','backtest'].includes(state.settings.lastCategory) ? state.settings.lastCategory : 'real';
   applyTheme(state.settings.theme);
@@ -2910,12 +2930,22 @@ function renderSettings(main){
 }
 
 /* ============================= RULEBOOK ============================= */
-/* Fully independent of the trade journal above: its own local store, its own state,
-   nothing here reads or writes state.trades / Supabase. Rules to take, and rules to avoid. */
-const RULEBOOK_KEY = 'fj:rulebook';
-function loadRulebook(){ try{ return JSON.parse(localStorage.getItem(RULEBOOK_KEY) || '[]'); }catch(e){ return []; } }
-function saveRulebook(){ try{ localStorage.setItem(RULEBOOK_KEY, JSON.stringify(rb.rules)); }catch(e){} }
-let rb = { rules: loadRulebook(), filter: 'all', search: '' };
+/* A separate entity from the trade journal above: its own kv_store key, its own state.
+   Nothing here reads or writes state.trades — deleting/importing trades never touches it. */
+/* Synced to the same account database as trades, under its own kv_store key —
+   a separate row ('rulebook'), so it never touches or overwrites trade data. */
+let rulebookSaveQueue = Promise.resolve();
+async function saveRulebook(){
+  rulebookSaveQueue = rulebookSaveQueue.then(async ()=>{
+    setSync('saving');
+    const ok = await storageSet('rulebook', JSON.stringify(rb.rules));
+    setSync(ok ? 'synced' : 'error');
+    if(!ok) toast('Could not save — check your connection', 'err');
+    return ok;
+  });
+  return rulebookSaveQueue;
+}
+let rb = { rules: [], filter: 'all', search: '' };
 function ruid(){ return 'r_' + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
 
 function renderRulebook(main){
@@ -2982,15 +3012,28 @@ function ruleCardHtml(r){
     </div>`;
 }
 function deleteRule(id){
-  confirmDialog({title:'Delete this rule?', message:'This permanently removes it from your rulebook.', okText:'Delete', danger:true}).then(ok=>{
+  confirmDialog({title:'Delete this rule?', message:'This permanently removes it from your rulebook.', okText:'Delete', danger:true}).then(async ok=>{
     if(!ok) return;
     rb.rules = rb.rules.filter(r=>r.id!==id);
-    saveRulebook(); SFX.del(); haptic('heavy'); renderMain(); toast('Rule deleted', 'warn');
+    SFX.del(); haptic('heavy'); renderMain();
+    await saveRulebook();
+    toast('Rule deleted', 'warn');
   });
+}
+function rbImgRowHtml(dataUrl){
+  return dataUrl
+    ? `<img src="${dataUrl}" class="rb-img-thumb" id="rbImgThumb" alt="Reference image">
+       <div class="rb-img-actions">
+         <label class="btn-ghost" style="cursor:pointer;">Replace<input type="file" accept="image/*" id="rbImgInput" style="display:none;"></label>
+         <button type="button" class="btn-ghost btn-danger" id="rbImgRemove">Remove</button>
+       </div>`
+    : `<label class="rb-img-empty" style="cursor:pointer;" aria-label="Add reference image">${ICONS.image}<input type="file" accept="image/*" id="rbImgInput" style="display:none;"></label>
+       <div class="rb-img-actions"><span class="rb-img-hint">Attach a chart or screenshot — only visible when you open this rule</span></div>`;
 }
 function openRuleModal(id){
   const existing = id ? rb.rules.find(r=>r.id===id) : null;
   let typeVal = existing ? existing.type : 'take';
+  let imgVal = existing ? (existing.img || null) : null;
   let formDirty = false;
   const { overlay, modal, close, requestClose } = makeOverlay(`
       <div class="modal-head"><h2>${existing?'Edit rule':'New rule'}</h2><button class="close-x" id="rbModalClose" aria-label="Close">${ICONS.x}</button></div>
@@ -3001,6 +3044,9 @@ function openRuleModal(id){
         <div class="form-field span2"><label>Title</label><input type="text" id="rbTitle" placeholder="e.g. London open liquidity sweep" value="${existing?escapeHtml(existing.title):''}"></div>
         <div class="form-field span2"><label>Criteria / notes</label><textarea id="rbBody" rows="4" placeholder="What makes this a take, or a no-trade?">${existing?escapeHtml(existing.body):''}</textarea></div>
         <div class="form-field span2"><label>Tags (comma separated)</label><input type="text" id="rbTags" placeholder="e.g. london, fvg, news-day" value="${existing?escapeHtml(existing.tags.join(', ')):''}"></div>
+        <div class="form-field span2 rb-img-field"><label>Reference image <span class="rb-img-optional">optional</span></label>
+          <div class="rb-img-row" id="rbImgRow">${rbImgRowHtml(imgVal)}</div>
+        </div>
       </div>
       <div class="modal-foot">
         <button class="btn-secondary" id="rbModalCancel">Cancel</button>
@@ -3018,16 +3064,36 @@ function openRuleModal(id){
       SFX.toggle(); haptic('select');
     };
   });
+  function bindRbImg(){
+    const input = overlay.querySelector('#rbImgInput');
+    if(input) input.onchange = async (e)=>{
+      const file = e.target.files[0]; if(!file) return;
+      try{ imgVal = await readImage(file); formDirty = true; refreshRbImg(); SFX.pop(); haptic('light'); }
+      catch(err){ SFX.error(); alertDialog('Could not read that image', 'Try a different file.'); }
+    };
+    const rm = overlay.querySelector('#rbImgRemove');
+    if(rm) rm.onclick = ()=>{ imgVal = null; formDirty = true; refreshRbImg(); SFX.swoosh(); };
+    const thumb = overlay.querySelector('#rbImgThumb');
+    if(thumb) thumb.onclick = ()=> openImageLightbox(imgVal);
+  }
+  function refreshRbImg(){
+    const row = overlay.querySelector('#rbImgRow');
+    if(row) row.innerHTML = rbImgRowHtml(imgVal);
+    bindRbImg();
+  }
+  bindRbImg();
   document.getElementById('rbModalClose').onclick = requestClose;
   document.getElementById('rbModalCancel').onclick = requestClose;
-  document.getElementById('rbModalSave').onclick = ()=>{
+  document.getElementById('rbModalSave').onclick = async ()=>{
     const title = document.getElementById('rbTitle').value.trim();
     if(!title){ SFX.error(); haptic('error'); const f = document.getElementById('rbTitle'); f.classList.add('shake'); f.focus(); setTimeout(()=>f.classList.remove('shake'),500); toast('Give the rule a title', 'err'); return; }
     const body = document.getElementById('rbBody').value.trim();
     const tags = document.getElementById('rbTags').value.split(',').map(t=>t.trim()).filter(Boolean);
-    if(existing){ Object.assign(existing, { title, body, tags, type: typeVal }); }
-    else { rb.rules.push({ id: ruid(), title, body, tags, type: typeVal, created: Date.now() }); }
-    saveRulebook(); SFX.success(); haptic('success'); close(); renderMain(); toast(existing ? 'Rule updated' : 'Rule saved', 'ok');
+    if(existing){ Object.assign(existing, { title, body, tags, type: typeVal, img: imgVal }); }
+    else { rb.rules.push({ id: ruid(), title, body, tags, type: typeVal, img: imgVal, created: Date.now() }); }
+    SFX.success(); haptic('success'); close(); renderMain();
+    await saveRulebook();
+    toast(existing ? 'Rule updated' : 'Rule saved', 'ok');
   };
   modal.addEventListener('keydown', (e)=>{ if((e.metaKey||e.ctrlKey) && e.key==='Enter'){ e.preventDefault(); document.getElementById('rbModalSave').click(); } });
   setTimeout(()=>{ if(!isMobile()){ const first = modal.querySelector('#rbTitle'); if(first) first.focus({preventScroll:true}); } }, 300);
