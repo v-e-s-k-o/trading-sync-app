@@ -957,6 +957,36 @@
     .settings-row:has(#defaultRiskPerTrade) .sr-body{min-width:calc(100% - 48px);}
     .settings-row:has(#defaultRiskPerTrade) .sr-right{width:calc(100% - 44px);justify-content:flex-end;margin-left:44px;}
   }
+
+  /* ---------- Rulebook ---------- */
+  .rb-stats{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:12px;margin-bottom:20px;}
+  .rb-toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:20px;}
+  .rb-toolbar .search-wrap{flex:1;min-width:180px;}
+  .rb-toolbar input[type=search]{width:100%;}
+  .rb-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;}
+  .rule-card{position:relative;padding:18px 20px 16px;overflow:hidden;}
+  .rule-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;}
+  .rule-card.take::before{background:linear-gradient(var(--gain),transparent);}
+  .rule-card.avoid::before{background:linear-gradient(var(--loss),transparent);}
+  .rule-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;}
+  .rule-num{font-size:11px;color:var(--text-3);font-weight:700;letter-spacing:.06em;text-transform:uppercase;}
+  .rule-title{font-size:16.5px;font-weight:700;margin:4px 0 8px;line-height:1.3;letter-spacing:-.2px;}
+  .rule-stamp{font-weight:800;font-size:11px;letter-spacing:.06em;text-transform:uppercase;border:1.5px solid;border-radius:8px;padding:4px 9px;white-space:nowrap;flex-shrink:0;}
+  .rule-stamp.take{color:var(--gain);border-color:var(--gain);background:var(--gain-dim);}
+  .rule-stamp.avoid{color:var(--loss);border-color:var(--loss);background:var(--loss-dim);}
+  .rule-body{color:var(--text-2);font-size:13.5px;line-height:1.55;white-space:pre-wrap;}
+  .rule-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px;}
+  .rule-tag{font-size:11px;font-weight:600;color:var(--accent);background:var(--accent-dim);border:1px solid var(--sep);padding:3px 9px;border-radius:999px;}
+  .rule-foot{display:flex;justify-content:space-between;align-items:center;margin-top:14px;padding-top:12px;border-top:1px solid var(--sep);}
+  .rule-date{font-size:11.5px;color:var(--text-3);font-weight:500;}
+  .rule-actions{display:flex;gap:2px;}
+  .toggle-btn.take.active{color:var(--gain);}
+  .toggle-btn.avoid.active{color:var(--loss);}
+  @media (max-width:780px){
+    .rb-stats{grid-template-columns:1fr 1fr;}
+    .rb-stats .kpi-hero{grid-column:1/-1;}
+    .rb-grid{grid-template-columns:1fr;}
+  }
 </style>
 </head>
 <body>
@@ -996,7 +1026,7 @@ const DOW = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturd
 const DOW_SHORT = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 const MONTH_ABBR = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 const JOURNAL_LABELS = { live:'Trading', backtest:'Backtesting' };
-const TABS = ['dashboard','log','analytics','calendar','settings'];
+const TABS = ['dashboard','log','analytics','calendar','rulebook','settings'];
 
 /* ============================= ICONS ============================= */
 const ICONS = {
@@ -1025,6 +1055,8 @@ const ICONS = {
   keyboard:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2.5"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M8 14h8"/></svg>',
   logout:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M10 17l5-5-5-5M15 12H3M21 4v16"/></svg>',
   flame:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c4 0 7-3 7-7 0-3-2-5-3-7-1 2-2 3-3 3 0-3-1-6-4-8 0 4-4 6-4 12 0 4 3 7 7 7z"/></svg>',
+  rulebook:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/><path d="M9 7h7M9 11h5"/></svg>',
+  gavel:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M13 6l5 5M3 21l7-7M8.5 6.5l5 5M6 9l3-3 6 6-3 3z"/></svg>',
 };
 const LOGO_SVG = `<svg class="logo-mark" viewBox="0 0 64 64"><defs><linearGradient id="lg2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#a78bfa"/><stop offset=".55" stop-color="#8b5cf6"/><stop offset="1" stop-color="#5b21b6"/></linearGradient></defs><rect width="64" height="64" rx="16" fill="url(#lg2)"/><path d="M14 42 L24 30 L32 36 L50 18" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="50" cy="18" r="4" fill="#fff"/></svg>`;
 
@@ -1884,7 +1916,7 @@ document.addEventListener('keydown', (e)=>{
   if(e.metaKey||e.ctrlKey||e.altKey) return;
   if(!state.loaded || overlayStack.length) return;
   if(e.key==='n' || e.key==='N'){ e.preventDefault(); openTradeModal(); }
-  else if(e.key>='1' && e.key<='5'){ e.preventDefault(); goTab(TABS[parseInt(e.key)-1]); }
+  else if(e.key>='1' && e.key<='6'){ e.preventDefault(); goTab(TABS[parseInt(e.key)-1]); }
   else if(e.key==='t' || e.key==='T'){ e.preventDefault(); toggleTheme(); }
   else if(e.key==='/' ){ const s = document.getElementById('fSearch'); if(s){ e.preventDefault(); s.focus(); } }
 });
@@ -2173,8 +2205,9 @@ function render(){
         ${navItem('log','Trade log','log','2')}
         ${navItem('analytics','Analytics','analytics','3')}
         ${navItem('calendar','Calendar','calendar','4')}
+        ${navItem('rulebook','Rulebook','rulebook','5')}
         <div class="nav-divider"></div>
-        ${navItem('settings','Settings','settings','5')}
+        ${navItem('settings','Settings','settings','6')}
       </nav>
       <div class="sidebar-foot">
         <div class="theme-row"><span style="display:flex;align-items:center;gap:8px;"><span id="themeIcon" style="display:inline-flex;width:16px;height:16px;"></span>Dark mode</span><button class="switch accent ${state.settings.theme==='dark'?'on':''}" id="themeSwitch" aria-label="Toggle dark mode" data-silent></button></div>
@@ -2189,6 +2222,7 @@ function render(){
       ${mobileNavItem('log','Log','log')}
       ${mobileNavItem('analytics','Stats','analytics')}
       ${mobileNavItem('calendar','Calendar','calendar')}
+      ${mobileNavItem('rulebook','Rules','rulebook')}
       ${mobileNavItem('settings','Settings','settings')}
     </nav>
     <button class="mobile-fab" id="mobileFab" aria-label="Log a trade" data-silent>${ICONS.plus}</button>
@@ -2231,6 +2265,7 @@ function renderMain(animate){
   else if(state.activeTab==='log') renderLog(wrap);
   else if(state.activeTab==='analytics') renderAnalytics(wrap);
   else if(state.activeTab==='calendar') renderCalendar(wrap);
+  else if(state.activeTab==='rulebook') renderRulebook(wrap);
   else if(state.activeTab==='settings') renderSettings(wrap);
   afterRender(wrap);
 }
@@ -2825,7 +2860,7 @@ function renderSettings(main){
         <div class="settings-group-title">Keyboard shortcuts</div>
         <div class="settings-group"><div class="settings-row"><div class="sr-ic" style="background:var(--fill-2);color:var(--text-2);">${ICONS.keyboard}</div><div class="sr-body kbd-list">
           <div><span>Log a new trade</span><span class="kbd">N</span></div>
-          <div><span>Switch pages</span><span><span class="kbd">1</span> – <span class="kbd">5</span></span></div>
+          <div><span>Switch pages</span><span><span class="kbd">1</span> – <span class="kbd">6</span></span></div>
           <div><span>Toggle dark mode</span><span class="kbd">T</span></div>
           <div><span>Focus search (Trade log)</span><span class="kbd">/</span></div>
           <div><span>Close dialog</span><span class="kbd">Esc</span></div>
@@ -2872,6 +2907,130 @@ function renderSettings(main){
     };
     reader.readAsText(file);
   };
+}
+
+/* ============================= RULEBOOK ============================= */
+/* Fully independent of the trade journal above: its own local store, its own state,
+   nothing here reads or writes state.trades / Supabase. Rules to take, and rules to avoid. */
+const RULEBOOK_KEY = 'fj:rulebook';
+function loadRulebook(){ try{ return JSON.parse(localStorage.getItem(RULEBOOK_KEY) || '[]'); }catch(e){ return []; } }
+function saveRulebook(){ try{ localStorage.setItem(RULEBOOK_KEY, JSON.stringify(rb.rules)); }catch(e){} }
+let rb = { rules: loadRulebook(), filter: 'all', search: '' };
+function ruid(){ return 'r_' + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+
+function renderRulebook(main){
+  const q = rb.search.trim().toLowerCase();
+  const list = rb.rules.filter(r=>{
+    if(rb.filter!=='all' && r.type!==rb.filter) return false;
+    if(!q) return true;
+    return (r.title+' '+r.body+' '+r.tags.join(' ')).toLowerCase().includes(q);
+  }).sort((a,b)=> b.created - a.created);
+  const takeCount = rb.rules.filter(r=>r.type==='take').length;
+  const avoidCount = rb.rules.filter(r=>r.type==='avoid').length;
+
+  main.innerHTML = `
+    <div class="page-header">
+      <div><h1 class="page-title">Rulebook</h1><p class="page-subtitle">Setups to take, and the ones to leave alone — the law you trade by, separate from your trade log.</p></div>
+      <div class="header-actions"><button class="btn-primary" id="rbAddBtn">${ICONS.plus.replace('<svg','<svg width="14" height="14" stroke-width="2.6"')} New rule</button></div>
+    </div>
+    <div class="rb-stats stagger">
+      <div class="kpi-hero"><div class="lbl">Total rules</div><div class="val">${rb.rules.length}</div><div class="sub">${takeCount} to take · ${avoidCount} to avoid</div></div>
+      <div class="kpi-card"><div class="lbl">Take</div><div class="val" style="color:var(--gain);">${takeCount}</div><div class="sub">Confirmed setups</div></div>
+      <div class="kpi-card"><div class="lbl">Avoid</div><div class="val" style="color:var(--loss);">${avoidCount}</div><div class="sub">No-trade conditions</div></div>
+    </div>
+    <div class="rb-toolbar">
+      <div class="search-wrap"><input type="search" id="rbSearch" placeholder="Search rules or tags…" value="${escapeHtml(rb.search)}"></div>
+      <div class="segmented" id="rbFilterSeg">
+        <button data-f="all" class="${rb.filter==='all'?'active':''}" data-silent>All</button>
+        <button data-f="take" class="${rb.filter==='take'?'active':''}" data-silent>Take</button>
+        <button data-f="avoid" class="${rb.filter==='avoid'?'active':''}" data-silent>Avoid</button>
+      </div>
+    </div>
+    ${list.length ? `<div class="rb-grid stagger">${list.map(r=>ruleCardHtml(r)).join('')}</div>` : `
+      <div class="empty-state">
+        <div class="empty-icon">${ICONS.rulebook}</div>
+        <div class="empty-title">${rb.rules.length ? 'No rules match' : 'No rules yet'}</div>
+        <div class="empty-sub">${rb.rules.length ? 'Try a different search or filter.' : 'Write the first law of your book — what you always take, and what you never touch.'}</div>
+      </div>`}
+  `;
+  document.getElementById('rbAddBtn').onclick = ()=>openRuleModal();
+  const search = document.getElementById('rbSearch');
+  let rbSearchTimer;
+  search.oninput = (e)=>{ rb.search = e.target.value; clearTimeout(rbSearchTimer); rbSearchTimer = setTimeout(()=>{ const pos = e.target.selectionStart; renderMain(); const s2 = document.getElementById('rbSearch'); if(s2){ s2.focus(); try{ s2.setSelectionRange(pos,pos); }catch(_){} } }, 180); };
+  document.getElementById('rbFilterSeg').querySelectorAll('button').forEach(b=>{
+    b.onclick = ()=> segSelect(document.getElementById('rbFilterSeg'), b, ()=>{ rb.filter = b.dataset.f; renderMain(); });
+  });
+  main.querySelectorAll('[data-editrule]').forEach(el=> el.onclick = ()=> openRuleModal(el.dataset.editrule));
+  main.querySelectorAll('[data-delrule]').forEach(el=> el.onclick = ()=> deleteRule(el.dataset.delrule));
+}
+function ruleCardHtml(r){
+  return `
+    <div class="card rule-card ${r.type}">
+      <div class="rule-top">
+        <div><div class="rule-num">${r.type==='take'?'Take':'Avoid'}</div><div class="rule-title">${escapeHtml(r.title)}</div></div>
+        <div class="rule-stamp ${r.type}">${r.type==='take'?'Take it':'Avoid it'}</div>
+      </div>
+      ${r.body ? `<div class="rule-body">${escapeHtml(r.body)}</div>` : ''}
+      ${r.tags.length ? `<div class="rule-tags">${r.tags.map(t=>`<span class="rule-tag">#${escapeHtml(t)}</span>`).join('')}</div>` : ''}
+      <div class="rule-foot">
+        <div class="rule-date">${new Date(r.created).toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'})}</div>
+        <div class="rule-actions">
+          <button class="icon-btn" data-editrule="${r.id}" aria-label="Edit rule">${ICONS.edit.replace('<svg','<svg width="14" height="14"')}</button>
+          <button class="icon-btn" data-delrule="${r.id}" aria-label="Delete rule">${ICONS.trash.replace('<svg','<svg width="14" height="14"')}</button>
+        </div>
+      </div>
+    </div>`;
+}
+function deleteRule(id){
+  confirmDialog({title:'Delete this rule?', message:'This permanently removes it from your rulebook.', okText:'Delete', danger:true}).then(ok=>{
+    if(!ok) return;
+    rb.rules = rb.rules.filter(r=>r.id!==id);
+    saveRulebook(); SFX.del(); haptic('heavy'); renderMain(); toast('Rule deleted', 'warn');
+  });
+}
+function openRuleModal(id){
+  const existing = id ? rb.rules.find(r=>r.id===id) : null;
+  let typeVal = existing ? existing.type : 'take';
+  let formDirty = false;
+  const { overlay, modal, close, requestClose } = makeOverlay(`
+      <div class="modal-head"><h2>${existing?'Edit rule':'New rule'}</h2><button class="close-x" id="rbModalClose" aria-label="Close">${ICONS.x}</button></div>
+      <div class="form-grid">
+        <div class="form-field span2"><label>Type</label>
+          <div class="toggle-row"><button type="button" class="toggle-btn take ${typeVal==='take'?'active':''}" data-rbtype="take" data-silent>Take it</button><button type="button" class="toggle-btn avoid ${typeVal==='avoid'?'active':''}" data-rbtype="avoid" data-silent>Avoid it</button></div>
+        </div>
+        <div class="form-field span2"><label>Title</label><input type="text" id="rbTitle" placeholder="e.g. London open liquidity sweep" value="${existing?escapeHtml(existing.title):''}"></div>
+        <div class="form-field span2"><label>Criteria / notes</label><textarea id="rbBody" rows="4" placeholder="What makes this a take, or a no-trade?">${existing?escapeHtml(existing.body):''}</textarea></div>
+        <div class="form-field span2"><label>Tags (comma separated)</label><input type="text" id="rbTags" placeholder="e.g. london, fvg, news-day" value="${existing?escapeHtml(existing.tags.join(', ')):''}"></div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn-secondary" id="rbModalCancel">Cancel</button>
+        <button class="btn-primary" id="rbModalSave">${existing?'Save changes':'Save rule'}</button>
+      </div>
+  `, '', { isDirty: ()=>formDirty });
+  mountToggleRows(modal);
+  modal.addEventListener('input', ()=>{ formDirty = true; });
+  overlay.querySelectorAll('[data-rbtype]').forEach(b=>{
+    b.onclick = ()=>{
+      formDirty = true; typeVal = b.dataset.rbtype;
+      const row = b.closest('.toggle-row');
+      row.querySelectorAll('.toggle-btn').forEach(x=>x.classList.toggle('active', x===b));
+      if(row._place) row._place(true);
+      SFX.toggle(); haptic('select');
+    };
+  });
+  document.getElementById('rbModalClose').onclick = requestClose;
+  document.getElementById('rbModalCancel').onclick = requestClose;
+  document.getElementById('rbModalSave').onclick = ()=>{
+    const title = document.getElementById('rbTitle').value.trim();
+    if(!title){ SFX.error(); haptic('error'); const f = document.getElementById('rbTitle'); f.classList.add('shake'); f.focus(); setTimeout(()=>f.classList.remove('shake'),500); toast('Give the rule a title', 'err'); return; }
+    const body = document.getElementById('rbBody').value.trim();
+    const tags = document.getElementById('rbTags').value.split(',').map(t=>t.trim()).filter(Boolean);
+    if(existing){ Object.assign(existing, { title, body, tags, type: typeVal }); }
+    else { rb.rules.push({ id: ruid(), title, body, tags, type: typeVal, created: Date.now() }); }
+    saveRulebook(); SFX.success(); haptic('success'); close(); renderMain(); toast(existing ? 'Rule updated' : 'Rule saved', 'ok');
+  };
+  modal.addEventListener('keydown', (e)=>{ if((e.metaKey||e.ctrlKey) && e.key==='Enter'){ e.preventDefault(); document.getElementById('rbModalSave').click(); } });
+  setTimeout(()=>{ if(!isMobile()){ const first = modal.querySelector('#rbTitle'); if(first) first.focus({preventScroll:true}); } }, 300);
 }
 
 /* ============================= MODAL: ADD / EDIT TRADE ============================= */
