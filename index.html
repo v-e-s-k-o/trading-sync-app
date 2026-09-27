@@ -549,6 +549,7 @@
   tbody tr.row-in{opacity:1;}
   .page.tab-anim tbody tr.row-in{animation:fadeUp .4s var(--ease) both;}
   .table-scroll{max-height:640px;overflow:auto;border-radius:var(--r-m);}
+  .table-scroll.table-scroll-unbounded{max-height:none;overflow:hidden;width:max-content;min-width:100%;}
   .badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:700;white-space:nowrap;letter-spacing:.01em;}
   .badge.long,.badge.win{background:var(--gain-dim);color:var(--gain);}
   .badge.short,.badge.loss{background:var(--loss-dim);color:var(--loss);}
@@ -2531,7 +2532,7 @@ function renderLog(main){
     <div class="trade-list stagger">${trades.map(tradeCardHtml).join('')}</div>
     ${totalInJournal ? `<div style="margin-top:16px;text-align:center;"><button class="btn-ghost" id="btnExport">${ICONS.download.replace('<svg','<svg width="13" height="13" stroke-width="2.2"')} Export CSV</button></div>`:''}
     ` : `
-    <div class="table-scroll panel" style="padding:0;">
+    <div class="table-scroll table-scroll-unbounded panel" style="padding:0;">
       <table class="table-wide">
         <thead><tr>
           ${th('date','Date')}${th('time','Time')}${th(null,'Day')}${th('symbol','Pair')}${th('rating','Rating')}
