@@ -994,6 +994,17 @@
   .rb-img-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
   .rb-img-actions .btn-ghost{font-size:11.5px;padding:6px 12px;}
   .rb-img-hint{font-size:11.5px;color:var(--text-3);line-height:1.4;max-width:280px;}
+  /* ---------- Remember (key reminders) ---------- */
+  .remind-panel{margin-bottom:12px;}
+  .remind-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;}
+  .remind-top .btn-ghost{flex-shrink:0;display:inline-flex;align-items:center;gap:6px;}
+  .remind-list{list-style:none;margin:0;padding:0;}
+  .remind-item{display:flex;align-items:flex-start;gap:12px;padding:12px 0;border-top:1px solid var(--sep);}
+  .remind-item::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--accent);flex:0 0 6px;margin-top:9px;}
+  .remind-text{flex:1;min-width:0;font-size:14.5px;line-height:1.55;white-space:pre-wrap;overflow-wrap:anywhere;color:var(--text);}
+  .remind-actions{display:flex;gap:2px;flex-shrink:0;}
+  .remind-empty{font-size:13px;color:var(--text-3);line-height:1.5;padding:2px 0;}
+  @media (max-width:780px){ .remind-actions .icon-btn{padding:10px;} }
   @media (max-width:780px){
     .rb-stats{grid-template-columns:1fr 1fr;}
     .rb-stats .kpi-hero{grid-column:1/-1;}
@@ -1256,6 +1267,14 @@ function subscribeRealtime(){
           if(state.activeTab==='rulebook') renderMain();
           toast('Rulebook synced from another device', 'info');
         }
+      } else if(key==='reminders'){
+        const v = await storageGet('reminders');
+        const incoming = v ? JSON.parse(v) : [];
+        if(JSON.stringify(incoming) !== JSON.stringify(remState.items)){
+          remState.items = incoming;
+          if(state.activeTab==='dashboard') renderMain();
+          toast('Reminders synced from another device', 'info');
+        }
       }
     })
     .subscribe();
@@ -1296,6 +1315,7 @@ async function loadData(){
   state.trades.forEach(t=>{ if(symbolMigration[t.symbol]) t.symbol = symbolMigration[t.symbol]; });
   try{ const v2 = await storageGet('settings'); if(v2) state.settings = Object.assign(state.settings, JSON.parse(v2)); }catch(e){}
   try{ const vr = await storageGet('rulebook'); rb.rules = vr ? JSON.parse(vr) : []; }catch(e){ rb.rules = []; }
+  try{ const vm = await storageGet('reminders'); remState.items = vm ? JSON.parse(vm) : []; }catch(e){ remState.items = []; }
   state.journal = state.settings.lastJournal === 'backtest' ? 'backtest' : 'live';
   state.category = ['real','demo','backtest'].includes(state.settings.lastCategory) ? state.settings.lastCategory : 'real';
   applyTheme(state.settings.theme);
@@ -2405,6 +2425,7 @@ function renderDashboard(main){
       <div class="header-actions">${categorySegmented()}${rangeSegmented()}<button class="btn-primary" id="btnAddTop">${ICONS.plus.replace('<svg','<svg width="14" height="14" stroke-width="2.6"')} Log trade</button></div>
     </div>
     <div class="stagger">
+    ${renderRemindersPanel()}
     ${renderCategoryOverviewCards()}
     ${trades.length===0 ? emptyState('No trades logged yet','Add your first trade to see analytics come to life.') : `
     <div class="section-title" style="margin-top:6px;">Overview</div>
@@ -2461,6 +2482,7 @@ function renderDashboard(main){
   document.getElementById('btnAddTop').onclick = ()=>openTradeModal();
   const seeAll = document.getElementById('btnSeeAllLog'); if(seeAll) seeAll.onclick = ()=> goTab('log');
   bindTradeCards(main);
+  bindReminders(main);
   if(trades.length){ drawWLDonut(trades); drawDowChart(trades, 'chartDow'); drawEquityChart(trades, 'chartEquity'); }
 }
 
@@ -3099,6 +3121,84 @@ function openRuleModal(id){
   };
   modal.addEventListener('keydown', (e)=>{ if((e.metaKey||e.ctrlKey) && e.key==='Enter'){ e.preventDefault(); document.getElementById('rbModalSave').click(); } });
   setTimeout(()=>{ if(!isMobile()){ const first = modal.querySelector('#rbTitle'); if(first) first.focus({preventScroll:true}); } }, 300);
+}
+
+/* ============================= REMEMBER (key reminders) ============================= */
+/* The things the trader must not forget. Any number of entries, shown on the Dashboard.
+   Stored in its own kv_store row ('reminders') — never touches trades, settings or the rulebook. */
+let remState = { items: [] };
+let remindersSaveQueue = Promise.resolve();
+function remuid(){ return 'm_' + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+async function saveReminders(){
+  remindersSaveQueue = remindersSaveQueue.then(async ()=>{
+    setSync('saving');
+    const ok = await storageSet('reminders', JSON.stringify(remState.items));
+    setSync(ok ? 'synced' : 'error');
+    if(!ok) toast('Could not save — check your connection', 'err');
+    return ok;
+  });
+  return remindersSaveQueue;
+}
+function renderRemindersPanel(){
+  const items = remState.items.slice().sort((a,b)=> a.created - b.created);
+  return `
+    <div class="panel remind-panel">
+      <div class="remind-top">
+        ${panelHeading('info','Remember', items.length ? `${items.length} thing${items.length===1?'':'s'} you can’t afford to forget` : 'The things you can’t afford to forget')}
+        <button class="btn-ghost" id="remAddBtn" data-silent>${ICONS.plus.replace('<svg','<svg width="13" height="13" stroke-width="2.4"')} Add</button>
+      </div>
+      ${items.length ? `<ul class="remind-list">${items.map(m=>`
+        <li class="remind-item">
+          <div class="remind-text">${escapeHtml(m.text)}</div>
+          <div class="remind-actions">
+            <button class="icon-btn" data-editrem="${m.id}" aria-label="Edit reminder">${ICONS.edit.replace('<svg','<svg width="14" height="14"')}</button>
+            <button class="icon-btn" data-delrem="${m.id}" aria-label="Delete reminder">${ICONS.trash.replace('<svg','<svg width="14" height="14"')}</button>
+          </div>
+        </li>`).join('')}</ul>` : `<div class="remind-empty">Nothing here yet. Add the most important things you need to remember — as many as you like.</div>`}
+    </div>`;
+}
+function bindReminders(root){
+  const add = root.querySelector('#remAddBtn'); if(add) add.onclick = ()=>{ SFX.pop(); haptic('light'); openReminderModal(); };
+  root.querySelectorAll('[data-editrem]').forEach(el=> el.onclick = ()=> openReminderModal(el.dataset.editrem));
+  root.querySelectorAll('[data-delrem]').forEach(el=> el.onclick = ()=> deleteReminder(el.dataset.delrem));
+}
+function deleteReminder(id){
+  confirmDialog({title:'Delete this reminder?', message:'This permanently removes it.', okText:'Delete', danger:true}).then(async ok=>{
+    if(!ok) return;
+    remState.items = remState.items.filter(m=>m.id!==id);
+    SFX.del(); haptic('heavy'); renderMain();
+    await saveReminders();
+    toast('Reminder deleted', 'warn');
+  });
+}
+function openReminderModal(id){
+  const existing = id ? remState.items.find(m=>m.id===id) : null;
+  let formDirty = false;
+  const { overlay, modal, close, requestClose } = makeOverlay(`
+      <div class="modal-head"><h2>${existing?'Edit reminder':'New reminder'}</h2><button class="close-x" id="remModalClose" aria-label="Close">${ICONS.x}</button></div>
+      <div class="form-grid">
+        <div class="form-field span2"><label>What do you need to remember?</label><textarea id="remText" rows="4" placeholder="e.g. No revenge trades after a loss">${existing?escapeHtml(existing.text):''}</textarea></div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn-secondary" id="remModalCancel">Cancel</button>
+        <button class="btn-primary" id="remModalSave">${existing?'Save changes':'Save reminder'}</button>
+      </div>
+  `, '', { isDirty: ()=>formDirty });
+  modal.addEventListener('input', ()=>{ formDirty = true; });
+  document.getElementById('remModalClose').onclick = requestClose;
+  document.getElementById('remModalCancel').onclick = requestClose;
+  document.getElementById('remModalSave').onclick = async ()=>{
+    const f = document.getElementById('remText');
+    const text = f.value.trim();
+    if(!text){ SFX.error(); haptic('error'); f.classList.add('shake'); f.focus(); setTimeout(()=>f.classList.remove('shake'),500); toast('Write something to remember', 'err'); return; }
+    if(existing){ existing.text = text; }
+    else { remState.items.push({ id: remuid(), text, created: Date.now() }); }
+    SFX.success(); haptic('success'); close(); renderMain();
+    await saveReminders();
+    toast(existing ? 'Reminder updated' : 'Reminder saved', 'ok');
+  };
+  modal.addEventListener('keydown', (e)=>{ if((e.metaKey||e.ctrlKey) && e.key==='Enter'){ e.preventDefault(); document.getElementById('remModalSave').click(); } });
+  setTimeout(()=>{ if(!isMobile()){ const first = modal.querySelector('#remText'); if(first) first.focus({preventScroll:true}); } }, 300);
 }
 
 /* ============================= MODAL: ADD / EDIT TRADE ============================= */
