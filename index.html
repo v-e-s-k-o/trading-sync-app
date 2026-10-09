@@ -1010,6 +1010,48 @@
     .rb-stats .kpi-hero{grid-column:1/-1;}
     .rb-grid{grid-template-columns:1fr;}
   }
+
+  /* =====================================================================
+     FADE JOURNAL + NOTEBOOK
+     ===================================================================== */
+  .fd-composer{padding:18px 20px;display:flex;flex-direction:column;gap:12px;margin-bottom:18px;}
+  .fd-composer-row{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;}
+  .fd-composer-row .form-field{margin:0;}
+  .fd-list{display:flex;flex-direction:column;gap:12px;}
+  .fd-card{padding:16px 18px;}
+  .fd-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px;}
+  .fd-date{font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--accent);}
+  .fd-notes{white-space:pre-wrap;word-break:break-word;font-size:14.5px;line-height:1.6;color:var(--text);}
+  .fd-edit{display:flex;flex-direction:column;gap:10px;}
+  .fd-edit-actions{display:flex;gap:8px;justify-content:flex-end;}
+  .nb-toolbar{position:sticky;top:8px;z-index:30;display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:8px 10px;margin-bottom:14px;background:var(--glass-strong);backdrop-filter:blur(24px) saturate(160%);-webkit-backdrop-filter:blur(24px) saturate(160%);border:.5px solid var(--sep-strong);border-radius:16px;}
+  .nb-group{display:flex;gap:4px;align-items:center;padding-right:8px;margin-right:2px;border-right:.5px solid var(--sep);}
+  .nb-group:last-child{border-right:none;padding-right:0;margin-right:0;}
+  .nb-btn{min-width:34px;height:34px;padding:0 8px;display:inline-flex;align-items:center;justify-content:center;gap:4px;background:transparent;border:none;border-radius:9px;color:var(--text);font-size:14px;cursor:pointer;font-family:inherit;transition:background-color .15s;}
+  .nb-btn:hover{background:var(--fill-2);}
+  .nb-btn.active{background:var(--accent-dim);color:var(--accent);}
+  .nb-btn svg{width:17px;height:17px;stroke-width:2;}
+  .nb-sel{height:34px;padding:0 8px;border-radius:9px;font-size:13px;width:auto;min-width:0;}
+  .nb-color{position:relative;overflow:hidden;}
+  .nb-color input[type=color]{position:absolute;inset:0;opacity:0;width:100%;height:100%;cursor:pointer;border:none;padding:0;}
+  .nb-color .nb-swatch{width:16px;height:4px;border-radius:2px;display:block;margin-top:2px;}
+  .nb-color-glyph{display:flex;flex-direction:column;align-items:center;line-height:1;font-weight:800;}
+  .nb-doc{min-height:70vh;padding:34px 40px 80px;font-size:16px;line-height:1.7;outline:none;word-break:break-word;overflow-wrap:anywhere;cursor:text;}
+  .nb-doc:empty::before{content:attr(data-placeholder);color:var(--text-3);pointer-events:none;}
+  .nb-doc img{max-width:100%;height:auto;border-radius:10px;display:block;margin:10px 0;cursor:pointer;}
+  .nb-doc h1{font-size:30px;line-height:1.25;margin:18px 0 8px;}
+  .nb-doc h2{font-size:24px;line-height:1.3;margin:16px 0 6px;}
+  .nb-doc h3{font-size:19px;line-height:1.3;margin:14px 0 6px;}
+  .nb-doc ul,.nb-doc ol{padding-left:26px;margin:6px 0;}
+  .nb-doc p{margin:0;}
+  @media (max-width:780px){
+    .nb-doc{padding:22px 16px 90px;font-size:16px;}
+    .nb-toolbar{top:4px;padding:6px 8px;}
+    .mobile-nav-item{font-size:9px;padding-left:0;padding-right:0;}
+    .mobile-nav-item svg{width:21px;height:21px;}
+    .fd-composer-row .form-field{width:100%;}
+  }
+
 </style>
 </head>
 <body>
@@ -1049,7 +1091,7 @@ const DOW = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturd
 const DOW_SHORT = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 const MONTH_ABBR = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 const JOURNAL_LABELS = { live:'Trading', backtest:'Backtesting' };
-const TABS = ['dashboard','log','analytics','calendar','rulebook','settings'];
+const TABS = ['dashboard','log','analytics','calendar','rulebook','fade','notebook','settings'];
 
 /* ============================= ICONS ============================= */
 const ICONS = {
@@ -1079,6 +1121,8 @@ const ICONS = {
   logout:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M10 17l5-5-5-5M15 12H3M21 4v16"/></svg>',
   flame:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c4 0 7-3 7-7 0-3-2-5-3-7-1 2-2 3-3 3 0-3-1-6-4-8 0 4-4 6-4 12 0 4 3 7 7 7z"/></svg>',
   rulebook:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/><path d="M9 7h7M9 11h5"/></svg>',
+  fade:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4l10 8-10 8z"/><path d="M19 5v14"/></svg>',
+  notebook:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 13h7M9 17h7"/></svg>',
   gavel:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M13 6l5 5M3 21l7-7M8.5 6.5l5 5M6 9l3-3 6 6-3 3z"/></svg>',
 };
 const LOGO_SVG = `<svg class="logo-mark" viewBox="0 0 64 64"><defs><linearGradient id="lg2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#a78bfa"/><stop offset=".55" stop-color="#8b5cf6"/><stop offset="1" stop-color="#5b21b6"/></linearGradient></defs><rect width="64" height="64" rx="16" fill="url(#lg2)"/><path d="M14 42 L24 30 L32 36 L50 18" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="50" cy="18" r="4" fill="#fff"/></svg>`;
@@ -1267,6 +1311,24 @@ function subscribeRealtime(){
           if(state.activeTab==='rulebook') renderMain();
           toast('Rulebook synced from another device', 'info');
         }
+      } else if(key==='fade'){
+        const v = await storageGet('fade');
+        const incoming = v ? JSON.parse(v) : [];
+        if(JSON.stringify(incoming) !== JSON.stringify(fd.items)){
+          fd.items = incoming;
+          if(state.activeTab==='fade'){ renderFadeList(); updateFadeCount(); }
+          toast('Fade journal synced from another device', 'info');
+        }
+      } else if(key==='notebook'){
+        const v = await storageGet('notebook');
+        const raw = (typeof v==='string') ? v : '';
+        if(raw !== nb.lastSaved){
+          const ed = document.getElementById('nbDoc');
+          if(ed && document.activeElement===ed) return;
+          nb.lastSaved = raw; nb.html = sanitizeDoc(raw);
+          if(ed) ed.innerHTML = nb.html;
+          toast('Notebook synced from another device', 'info');
+        }
       } else if(key==='reminders'){
         const v = await storageGet('reminders');
         const incoming = v ? JSON.parse(v) : [];
@@ -1315,6 +1377,8 @@ async function loadData(){
   state.trades.forEach(t=>{ if(symbolMigration[t.symbol]) t.symbol = symbolMigration[t.symbol]; });
   try{ const v2 = await storageGet('settings'); if(v2) state.settings = Object.assign(state.settings, JSON.parse(v2)); }catch(e){}
   try{ const vr = await storageGet('rulebook'); rb.rules = vr ? JSON.parse(vr) : []; }catch(e){ rb.rules = []; }
+  try{ const vf = await storageGet('fade'); fd.items = vf ? JSON.parse(vf) : []; }catch(e){ fd.items = []; }
+  try{ const vn = await storageGet('notebook'); nb.lastSaved = (typeof vn==='string') ? vn : ''; nb.html = sanitizeDoc(nb.lastSaved); }catch(e){ nb.html = ''; }
   try{ const vm = await storageGet('reminders'); remState.items = vm ? JSON.parse(vm) : []; }catch(e){ remState.items = []; }
   state.journal = state.settings.lastJournal === 'backtest' ? 'backtest' : 'live';
   state.category = ['real','demo','backtest'].includes(state.settings.lastCategory) ? state.settings.lastCategory : 'real';
@@ -1957,7 +2021,7 @@ document.addEventListener('keydown', (e)=>{
   if(e.metaKey||e.ctrlKey||e.altKey) return;
   if(!state.loaded || overlayStack.length) return;
   if(e.key==='n' || e.key==='N'){ e.preventDefault(); openTradeModal(); }
-  else if(e.key>='1' && e.key<='6'){ e.preventDefault(); goTab(TABS[parseInt(e.key)-1]); }
+  else if(e.key>='1' && e.key<='8'){ e.preventDefault(); goTab(TABS[parseInt(e.key)-1]); }
   else if(e.key==='t' || e.key==='T'){ e.preventDefault(); toggleTheme(); }
   else if(e.key==='/' ){ const s = document.getElementById('fSearch'); if(s){ e.preventDefault(); s.focus(); } }
 });
@@ -2247,8 +2311,10 @@ function render(){
         ${navItem('analytics','Analytics','analytics','3')}
         ${navItem('calendar','Calendar','calendar','4')}
         ${navItem('rulebook','Rulebook','rulebook','5')}
+        ${navItem('fade','Fade journal','fade','6')}
+        ${navItem('notebook','Notebook','notebook','7')}
         <div class="nav-divider"></div>
-        ${navItem('settings','Settings','settings','6')}
+        ${navItem('settings','Settings','settings','8')}
       </nav>
       <div class="sidebar-foot">
         <div class="theme-row"><span style="display:flex;align-items:center;gap:8px;"><span id="themeIcon" style="display:inline-flex;width:16px;height:16px;"></span>Dark mode</span><button class="switch accent ${state.settings.theme==='dark'?'on':''}" id="themeSwitch" aria-label="Toggle dark mode" data-silent></button></div>
@@ -2264,12 +2330,14 @@ function render(){
       ${mobileNavItem('analytics','Stats','analytics')}
       ${mobileNavItem('calendar','Calendar','calendar')}
       ${mobileNavItem('rulebook','Rules','rulebook')}
+      ${mobileNavItem('fade','Fade','fade')}
+      ${mobileNavItem('notebook','Notes','notebook')}
       ${mobileNavItem('settings','Settings','settings')}
     </nav>
     <button class="mobile-fab" id="mobileFab" aria-label="Add" data-silent>${ICONS.plus}</button>
   `;
   document.getElementById('btnAddSidebar').onclick = ()=>openTradeModal();
-  document.getElementById('mobileFab').onclick = ()=>{ SFX.pop(); haptic('medium'); if(isMobile() && state.activeTab==='rulebook') openRuleModal(); else openTradeModal(); };
+  document.getElementById('mobileFab').onclick = ()=>{ SFX.pop(); haptic('medium'); if(isMobile() && state.activeTab==='rulebook') openRuleModal(); else if(state.activeTab==='fade'){ const f=document.getElementById('fdNotes'); if(f){ f.focus(); f.scrollIntoView({block:'center',behavior:'smooth'}); } } else if(state.activeTab==='notebook'){ const d=document.getElementById('nbDoc'); if(d) d.focus(); } else openTradeModal(); };
   document.getElementById('themeSwitch').onclick = (e)=> toggleTheme(e);
    app.querySelectorAll('.nav-item, .mobile-nav-item').forEach(el=>{
      el.onclick = ()=> goTab(el.dataset.tab);
@@ -2284,7 +2352,7 @@ function renderShellState(){
   document.querySelectorAll('.nav-item, .mobile-nav-item').forEach(el=>{ const active=el.dataset.tab===state.activeTab; el.classList.toggle('active',active); el.setAttribute('aria-current',active?'page':'false'); });
   const sw = document.getElementById('themeSwitch'); if(sw) sw.classList.toggle('on', state.settings.theme==='dark');
   const ti = document.getElementById('themeIcon'); if(ti) ti.innerHTML = state.settings.theme==='dark' ? ICONS.moon : ICONS.sun;
-  const fab = document.getElementById('mobileFab'); if(fab) fab.setAttribute('aria-label', state.activeTab==='rulebook' ? 'Add rule' : 'Log a trade');
+  const fab = document.getElementById('mobileFab'); if(fab) fab.setAttribute('aria-label', state.activeTab==='rulebook' ? 'Add rule' : state.activeTab==='fade' ? 'Add fade' : state.activeTab==='notebook' ? 'Write' : 'Log a trade');
   placeNavIndicator(true);
 }
 function goTab(tab){
@@ -2308,6 +2376,8 @@ function renderMain(animate){
   else if(state.activeTab==='analytics') renderAnalytics(wrap);
   else if(state.activeTab==='calendar') renderCalendar(wrap);
   else if(state.activeTab==='rulebook') renderRulebook(wrap);
+  else if(state.activeTab==='fade') renderFade(wrap);
+  else if(state.activeTab==='notebook') renderNotebook(wrap);
   else if(state.activeTab==='settings') renderSettings(wrap);
   afterRender(wrap);
 }
@@ -2519,7 +2589,7 @@ function renderLog(main){
   if(state.journal==='live' && f.demo!=='all') trades = trades.filter(t=>t.demo===f.demo);
   if(f.search){
     const q = f.search.toLowerCase();
-    trades = trades.filter(t => (t.po3||'').toLowerCase().includes(q) || (t.dol||'').toLowerCase().includes(q) || (t.psych||'').toLowerCase().includes(q) || (t.notes||'').toLowerCase().includes(q) || (t.symbol||'').toLowerCase().includes(q) || (t.model||'').toLowerCase().includes(q));
+    trades = trades.filter(t => (t.po3||'').toLowerCase().includes(q) || (t.dol||'').toLowerCase().includes(q) || (t.notes||'').toLowerCase().includes(q) || (t.symbol||'').toLowerCase().includes(q) || (t.model||'').toLowerCase().includes(q));
   }
   trades.sort((a,b)=>{
     let av=a[f.sortKey], bv=b[f.sortKey];
@@ -2540,7 +2610,7 @@ function renderLog(main){
       <div class="header-actions">${journalSegmented()}<button class="btn-primary" id="btnAddTop">${ICONS.plus.replace('<svg','<svg width="14" height="14" stroke-width="2.6"')} Log trade</button></div>
     </div>
     <div class="table-toolbar">
-      <input type="search" id="fSearch" placeholder="Search notes, psych, liquidity…" value="${escapeHtml(f.search)}" style="${mobile?'width:100%;':'width:260px;'}">
+      <input type="search" id="fSearch" placeholder="Search notes, liquidity…" value="${escapeHtml(f.search)}" style="${mobile?'width:100%;':'width:260px;'}">
       <div class="chip-row" style="${mobile?'width:100%;':''}">
         <select id="fSymbol" class="${f.symbol!=='all'?'filtered':''}"><option value="all" ${f.symbol==='all'?'selected':''}>All symbols</option>${Object.keys(SYMBOLS).map(s=>`<option value="${s}" ${f.symbol===s?'selected':''}>${s}</option>`).join('')}</select>
         <select id="fModel" class="${f.model!=='all'?'filtered':''}"><option value="all" ${f.model==='all'?'selected':''}>All models</option>${MODELS.map(s=>`<option value="${s}" ${f.model===s?'selected':''}>${s}</option>`).join('')}</select>
@@ -2560,7 +2630,7 @@ function renderLog(main){
           ${th('date','Date')}${th('time','Time')}${th(null,'Day')}${th('symbol','Pair')}${th('rating','Rating')}
           ${th('direction','Dir')}${th('model','Model')}${th('po3','PO3')}${th('entryTf','Entry TF')}
           ${th('outcome','Outcome')}${isLive?th('demo','Demo'):''}${th('rr','RR')}${th('pnl','P&amp;L')}
-          ${th('dol','Liquidity draw')}${th('psych','Psych')}${th(null,'Notes')}<th></th>
+          ${th('dol','Liquidity draw')}${th(null,'Notes')}<th></th>
         </tr></thead>
         <tbody>
           ${trades.map(t=>`
@@ -2579,7 +2649,6 @@ function renderLog(main){
               <td class="num">${rrLabel(t.rr)}</td>
               <td class="num ${colorForPnl(t.pnl)}" style="font-weight:700;">${fmtMoney(t.pnl,true)}</td>
               <td>${escapeHtml(t.dol||'—')}</td>
-              <td class="psych-cell" title="${escapeHtml(t.psych||'')}">${escapeHtml(truncateWords(t.psych,10))}</td>
               <td class="notes-cell" title="${escapeHtml(t.notes||'')}">${escapeHtml(truncateWords(t.notes,10))}</td>
               <td><div class="row-actions">
                 <button class="icon-btn" data-edit="${t.id}" aria-label="Edit">${ICONS.edit}</button>
@@ -2611,10 +2680,10 @@ function renderLog(main){
   bindTradeCards(main);
 }
 function exportCSV(){
-  const rows = [['journal_type','demo_trade','date','time','day_of_week','symbol','rating','direction','model','po3','entry_timeframe','outcome','breakeven_pnl_adjustment','risk_reward','risk_per_trade','pnl_dollars','draw_on_liquidity','psych','notes']];
+  const rows = [['journal_type','demo_trade','date','time','day_of_week','symbol','rating','direction','model','po3','entry_timeframe','outcome','breakeven_pnl_adjustment','risk_reward','risk_per_trade','pnl_dollars','draw_on_liquidity','notes']];
   state.trades.map(withDerived).forEach(t=>{
     const beAdj = (t.outcome==='be_win'||t.outcome==='be_loss') ? (parseFloat(t.beAdjustment)||0).toFixed(2) : '';
-    rows.push([JOURNAL_LABELS[t.journalType], t.journalType==='live'?(t.demo==='yes'?'Yes':'No'):'—', t.date, t.time||'', DOW[t.dow], t.symbol, t.rating, t.direction, t.model, t.po3, t.entryTf, outcomeMeta(t.outcome).label, beAdj, rrLabel(t.rr), tradeRisk(t).toFixed(2), t.pnl.toFixed(2), t.dol||'', t.psych||'', (t.notes||'').replace(/\n/g,' ')]);
+    rows.push([JOURNAL_LABELS[t.journalType], t.journalType==='live'?(t.demo==='yes'?'Yes':'No'):'—', t.date, t.time||'', DOW[t.dow], t.symbol, t.rating, t.direction, t.model, t.po3, t.entryTf, outcomeMeta(t.outcome).label, beAdj, rrLabel(t.rr), tradeRisk(t).toFixed(2), t.pnl.toFixed(2), t.dol||'', (t.notes||'').replace(/\n/g,' ')]);
   });
   const csv = rows.map(r=>r.map(v=>{ const s = String(v); return /[",\n]/.test(s) ? '"'+s.replace(/"/g,'""')+'"' : s; }).join(',')).join('\n');
   const blob = new Blob([csv], {type:'text/csv'});
@@ -3123,6 +3192,368 @@ function openRuleModal(id){
   setTimeout(()=>{ if(!isMobile()){ const first = modal.querySelector('#rbTitle'); if(first) first.focus({preventScroll:true}); } }, 300);
 }
 
+/* ============================= FADE JOURNAL =============================
+   Trades you wanted to take but didn't. Date + notes, nothing else.
+   Stored in its own kv_store row ('fade') — never touches trades, settings, rulebook. */
+let fd = { items: [], search: '', editing: null, draft: {}, editImgs: {} };
+let fadeSaveQueue = Promise.resolve();
+async function saveFade(){
+  fadeSaveQueue = fadeSaveQueue.then(async ()=>{
+    setSync('saving');
+    const ok = await storageSet('fade', JSON.stringify(fd.items));
+    setSync(ok ? 'synced' : 'error');
+    if(!ok) toast('Could not save — check your connection', 'err');
+    return ok;
+  });
+  return fadeSaveQueue;
+}
+function fid(){ return 'f_' + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+function localISO(d){ d = d || new Date(); const p = n=>String(n).padStart(2,'0'); return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate()); }
+function fmtFadeDate(iso){
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso||''); if(!m) return iso || '';
+  return new Date(+m[1], +m[2]-1, +m[3]).toLocaleDateString(undefined, {weekday:'short', month:'short', day:'numeric', year:'numeric'});
+}
+function updateFadeCount(){
+  const el = document.getElementById('fdCount'); if(!el) return;
+  const n = fd.items.length; el.textContent = n + (n===1 ? ' entry' : ' entries');
+}
+/* Chart screenshots for fade entries — same three slots / same image handling as the trade log */
+function fdSlotHtml(scope, key, label, dataUrl){
+  const sk = scope + '|' + key;
+  return `
+    <div class="img-slot" data-fdslot="${sk}">
+      <div class="img-slot-label">${label}</div>
+      ${dataUrl ? `<img src="${dataUrl}" class="img-slot-thumb" data-fdview="${sk}">` : `<label class="img-slot-empty" style="cursor:pointer;">${ICONS.image}<span>Tap to add</span><input type="file" accept="image/*" data-fdimg="${sk}" style="display:none;"></label>`}
+      <div class="img-slot-actions">
+        ${dataUrl ? `<label class="btn-ghost" style="cursor:pointer;">Replace<input type="file" accept="image/*" data-fdimg="${sk}" style="display:none;"></label><button type="button" class="btn-ghost btn-danger" data-fdimgrm="${sk}">Remove</button>` : ''}
+      </div>
+    </div>`;
+}
+function fdSlotsRow(scope, imgs){
+  return `<div class="form-field span2" style="margin:0;"><label>Chart screenshots</label><div class="img-upload-row">${TF_SLOTS.map(s=>fdSlotHtml(scope, s.key, s.label, imgs[s.key])).join('')}</div></div>`;
+}
+function fdImgStore(scope){ return scope==='c' ? fd.draft : fd.editImgs; }
+function fdRefreshSlot(scope, key){
+  const sk = scope + '|' + key;
+  const el = document.querySelector(`[data-fdslot="${sk}"]`); if(!el) return;
+  const slot = TF_SLOTS.find(s=>s.key===key);
+  el.outerHTML = fdSlotHtml(scope, key, slot.label, fdImgStore(scope)[key]);
+}
+function onFadeImgEvent(e){
+  const inp = e.target.closest && e.target.closest('[data-fdimg]');
+  if(e.type==='change' && inp){
+    const file = inp.files[0]; if(!file) return;
+    const [scope, key] = inp.dataset.fdimg.split('|');
+    readImage(file).then(url=>{ fdImgStore(scope)[key] = url; fdRefreshSlot(scope, key); SFX.pop(); haptic('light'); })
+      .catch(()=>{ SFX.error(); alertDialog('Could not read that image', 'Try a different file.'); });
+    return true;
+  }
+  if(e.type==='click'){
+    const rm = e.target.closest('[data-fdimgrm]');
+    if(rm){ const [scope, key] = rm.dataset.fdimgrm.split('|'); fdImgStore(scope)[key] = null; fdRefreshSlot(scope, key); SFX.swoosh(); return true; }
+    const th = e.target.closest('[data-fdview]');
+    if(th){ const [scope, key] = th.dataset.fdview.split('|'); openImageLightbox(fdImgStore(scope)[key]); return true; }
+  }
+}
+function fdDetailImgs(i){
+  if(!TF_SLOTS.some(s=>i[s.key])) return '';
+  return `<div class="detail-imgs" style="margin-top:12px;">${TF_SLOTS.map(s=>detailImgCard(s.label, i[s.key], s.key)).join('')}</div>`;
+}
+function renderFade(main){
+  main.innerHTML = `
+    <div class="page-header">
+      <div><h1 class="page-title">Fade journal</h1><p class="page-subtitle">Trades you wanted to take but didn't · <span id="fdCount"></span></p></div>
+    </div>
+    <div class="card fd-composer">
+      <div class="fd-composer-row">
+        <div class="form-field"><label>Date</label><input type="date" id="fdDate" value="${localISO()}"></div>
+      </div>
+      <div class="form-field" style="margin:0;"><label>Notes</label><textarea id="fdNotes" rows="4" placeholder="What did you see, and why didn't you take it?"></textarea></div>
+      <div id="fdComposerImgs">${fdSlotsRow('c', fd.draft)}</div>
+      <div style="display:flex;justify-content:flex-end;"><button class="btn-primary" id="fdAdd">${ICONS.plus.replace('<svg','<svg width="14" height="14" stroke-width="2.6"')} Add entry</button></div>
+    </div>
+    <div class="rb-toolbar"><div class="search-wrap"><input type="search" id="fdSearch" placeholder="Search entries…" value="${escapeHtml(fd.search)}"></div></div>
+    <div class="fd-list stagger" id="fdList"></div>
+  `;
+  updateFadeCount();
+  renderFadeList();
+  const ta = document.getElementById('fdNotes');
+  async function add(){
+    const notes = ta.value.trim();
+    if(!notes){ SFX.error(); haptic('error'); ta.classList.add('shake'); ta.focus(); setTimeout(()=>ta.classList.remove('shake'),500); toast('Add some notes first', 'err'); return; }
+    const entry = { id: fid(), date: document.getElementById('fdDate').value || localISO(), notes, created: Date.now() };
+    TF_SLOTS.forEach(s=>{ if(fd.draft[s.key]) entry[s.key] = fd.draft[s.key]; });
+    fd.items.push(entry);
+    fd.draft = {}; document.getElementById('fdComposerImgs').innerHTML = fdSlotsRow('c', fd.draft);
+    ta.value = ''; SFX.success(); haptic('success');
+    renderFadeList(); updateFadeCount();
+    await saveFade();
+    toast('Added to fade journal', 'ok');
+  }
+  document.getElementById('fdAdd').onclick = add;
+  ta.onkeydown = (e)=>{ if((e.metaKey||e.ctrlKey) && e.key==='Enter'){ e.preventDefault(); add(); } };
+  let t = null;
+  document.getElementById('fdSearch').oninput = (e)=>{ fd.search = e.target.value; clearTimeout(t); t = setTimeout(renderFadeList, 120); };
+  document.getElementById('fdList').addEventListener('click', onFadeListClick);
+  document.getElementById('fdList').addEventListener('change', onFadeImgEvent);
+  const comp = document.getElementById('fdComposerImgs');
+  comp.addEventListener('change', onFadeImgEvent);
+  comp.addEventListener('click', onFadeImgEvent);
+}
+function renderFadeList(){
+  const box = document.getElementById('fdList'); if(!box) return;
+  const q = fd.search.trim().toLowerCase();
+  const list = fd.items
+    .filter(i=> !q || (i.notes||'').toLowerCase().includes(q) || (i.date||'').includes(q))
+    .sort((a,b)=> (b.date||'').localeCompare(a.date||'') || (b.created||0) - (a.created||0));
+  if(!list.length){
+    box.innerHTML = `<div class="empty-state"><div class="empty-icon">${ICONS.fade}</div><div class="empty-title">${fd.items.length ? 'No entries match' : 'No fades yet'}</div><div class="empty-sub">${fd.items.length ? 'Try a different search.' : 'Log the trades you wanted to take but passed on.'}</div></div>`;
+    return;
+  }
+  box.innerHTML = list.map(i=>{
+    if(fd.editing === i.id){
+      return `<div class="card fd-card"><div class="fd-edit">
+        <div class="form-field" style="margin:0;"><label>Date</label><input type="date" data-fdedit-date value="${escapeHtml(i.date||localISO())}"></div>
+        <div class="form-field" style="margin:0;"><label>Notes</label><textarea rows="5" data-fdedit-notes>${escapeHtml(i.notes||'')}</textarea></div>
+        ${fdSlotsRow(i.id, fd.editImgs)}
+        <div class="fd-edit-actions"><button class="btn-secondary" data-fdcancel>Cancel</button><button class="btn-primary" data-fdsave="${i.id}">Save</button></div>
+      </div></div>`;
+    }
+    return `<div class="card fd-card">
+      <div class="fd-top"><div class="fd-date">${escapeHtml(fmtFadeDate(i.date))}</div>
+        <div class="rule-actions">
+          <button class="icon-btn" data-fdedit="${i.id}" aria-label="Edit entry">${ICONS.edit.replace('<svg','<svg width="14" height="14"')}</button>
+          <button class="icon-btn" data-fddel="${i.id}" aria-label="Delete entry">${ICONS.trash.replace('<svg','<svg width="14" height="14"')}</button>
+        </div></div>
+      <div class="fd-notes">${escapeHtml(i.notes||'')}</div>
+      ${fdDetailImgs(i)}
+    </div>`;
+  }).join('');
+}
+function onFadeListClick(e){
+  const ed = e.target.closest('[data-fdedit]'), del = e.target.closest('[data-fddel]'), sv = e.target.closest('[data-fdsave]'), cn = e.target.closest('[data-fdcancel]');
+  if(onFadeImgEvent(e)) return;
+  if(!ed && !del && !sv && !cn){
+    const dth = e.target.closest('.detail-img-thumb');
+    if(dth){ openImageLightbox(dth.src); }
+    return;
+  }
+  if(ed){
+    fd.editing = ed.dataset.fdedit;
+    const it = fd.items.find(x=>x.id===fd.editing) || {};
+    fd.editImgs = {}; TF_SLOTS.forEach(s=>{ if(it[s.key]) fd.editImgs[s.key] = it[s.key]; });
+    renderFadeList(); return;
+  }
+  if(cn){ fd.editing = null; fd.editImgs = {}; renderFadeList(); return; }
+  if(sv){
+    const item = fd.items.find(x=>x.id===sv.dataset.fdsave); if(!item) return;
+    const card = sv.closest('.fd-card');
+    const notes = card.querySelector('[data-fdedit-notes]').value.trim();
+    if(!notes){ SFX.error(); toast('Notes can’t be empty', 'err'); return; }
+    item.notes = notes; item.date = card.querySelector('[data-fdedit-date]').value || item.date;
+    TF_SLOTS.forEach(s=>{ if(fd.editImgs[s.key]) item[s.key] = fd.editImgs[s.key]; else delete item[s.key]; });
+    fd.editImgs = {};
+    fd.editing = null; SFX.success(); haptic('success'); renderFadeList();
+    saveFade().then(()=>toast('Entry updated', 'ok'));
+    return;
+  }
+  if(del){
+    const id = del.dataset.fddel;
+    confirmDialog({title:'Delete this entry?', message:'This permanently removes it from your fade journal.', okText:'Delete', danger:true}).then(async ok=>{
+      if(!ok) return;
+      fd.items = fd.items.filter(x=>x.id!==id);
+      SFX.del(); haptic('heavy'); renderFadeList(); updateFadeCount();
+      await saveFade(); toast('Entry deleted', 'warn');
+    });
+  }
+}
+
+/* ============================= NOTEBOOK =============================
+   One endless rich-text page: type, format, drop images between paragraphs.
+   Stored as HTML in its own kv_store row ('notebook'). */
+let nb = { html: '', lastSaved: '' };
+let nbTimer = null, nbSaveQueue = Promise.resolve(), nbRange = null, nbPendingSize = 16;
+function sanitizeDoc(html){
+  if(!html) return '';
+  try{
+    const doc = new DOMParser().parseFromString('<body>'+html+'</body>', 'text/html');
+    doc.body.querySelectorAll('script,iframe,object,embed,style,link,meta,form,base').forEach(n=>n.remove());
+    doc.body.querySelectorAll('*').forEach(n=>{
+      [...n.attributes].forEach(a=>{
+        const nm = a.name.toLowerCase(), v = (a.value||'').trim().toLowerCase();
+        if(nm.startsWith('on') || ((nm==='href'||nm==='src'||nm==='xlink:href') && v.startsWith('javascript:'))) n.removeAttribute(a.name);
+      });
+    });
+    return doc.body.innerHTML;
+  }catch(e){ return ''; }
+}
+async function saveNotebook(){
+  nbSaveQueue = nbSaveQueue.then(async ()=>{
+    setSync('saving');
+    const value = nb.html; nb.lastSaved = value;
+    const ok = await storageSet('notebook', value);
+    setSync(ok ? 'synced' : 'error');
+    if(!ok) toast('Could not save notebook — check your connection', 'err');
+    return ok;
+  });
+  return nbSaveQueue;
+}
+function nbFlush(){ if(nbTimer){ clearTimeout(nbTimer); nbTimer = null; saveNotebook(); } }
+window.addEventListener('pagehide', nbFlush);
+document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='hidden') nbFlush(); });
+document.addEventListener('selectionchange', ()=>{
+  const ed = document.getElementById('nbDoc'); if(!ed) return;
+  const s = window.getSelection();
+  if(s.rangeCount && ed.contains(s.anchorNode)){ nbRange = s.getRangeAt(0).cloneRange(); updateNbToolbar(); }
+});
+function updateNbToolbar(){
+  document.querySelectorAll('.nb-btn[data-state]').forEach(b=>{
+    let on = false; try{ on = document.queryCommandState(b.dataset.state); }catch(e){}
+    b.classList.toggle('active', !!on);
+  });
+}
+function nbRestore(){
+  const ed = document.getElementById('nbDoc'); if(!ed) return null;
+  ed.focus({preventScroll:true});
+  const s = window.getSelection();
+  if(nbRange && ed.contains(nbRange.startContainer)){ s.removeAllRanges(); s.addRange(nbRange); }
+  else { const r = document.createRange(); r.selectNodeContents(ed); r.collapse(false); s.removeAllRanges(); s.addRange(r); }
+  return ed;
+}
+function nbOnInput(){
+  const ed = document.getElementById('nbDoc'); if(!ed) return;
+  /* turn legacy <font size=7> (from the size picker) into real pixel sizes */
+  ed.querySelectorAll('font[size="7"]').forEach(f=>{
+    const sp = document.createElement('span'); sp.style.fontSize = nbPendingSize + 'px';
+    while(f.firstChild) sp.appendChild(f.firstChild);
+    f.replaceWith(sp);
+  });
+  if(!ed.textContent.trim() && !ed.querySelector('img,ul,ol')) ed.innerHTML = '';
+  nb.html = ed.innerHTML;
+  clearTimeout(nbTimer);
+  nbTimer = setTimeout(()=>{ nbTimer = null; saveNotebook(); }, 900);
+}
+function nbExec(cmd, val){
+  const ed = nbRestore(); if(!ed) return;
+  document.execCommand('styleWithCSS', false, true);
+  document.execCommand(cmd, false, val);
+  nbOnInput(); updateNbToolbar();
+}
+function nbSetSize(px){
+  const ed = nbRestore(); if(!ed) return;
+  nbPendingSize = px;
+  document.execCommand('styleWithCSS', false, false);
+  document.execCommand('fontSize', false, '7');
+  document.execCommand('styleWithCSS', false, true);
+  nbOnInput();
+}
+function readImageSized(file, maxDim, quality){
+  return new Promise((resolve, reject)=>{
+    const reader = new FileReader();
+    reader.onload = (e)=>{
+      const img = new Image();
+      img.onload = ()=>{
+        const W = img.naturalWidth || img.width, H = img.naturalHeight || img.height;
+        const sc = Math.min(1, maxDim / Math.max(W, H));
+        const c = document.createElement('canvas'); c.width = Math.max(1, Math.round(W*sc)); c.height = Math.max(1, Math.round(H*sc));
+        c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+        resolve(c.toDataURL('image/jpeg', quality));
+      };
+      img.onerror = ()=>reject(new Error('bad image'));
+      img.src = e.target.result;
+    };
+    reader.onerror = ()=>reject(new Error('read failed'));
+    reader.readAsDataURL(file);
+  });
+}
+async function nbInsertImages(files){
+  const imgs = [...files].filter(f=>/^image\//.test(f.type));
+  if(!imgs.length) return;
+  for(const f of imgs){
+    try{
+      const url = await readImageSized(f, 1800, 0.82);
+      const ed = nbRestore(); if(!ed) return;
+      document.execCommand('insertHTML', false, '<div><img src="'+url+'"></div><div><br></div>');
+      nbOnInput();
+    }catch(err){ SFX.error(); alertDialog('Could not read that image', 'Try a different file.'); }
+  }
+  SFX.pop(); haptic('light');
+}
+function renderNotebook(main){
+  const B = (cmd, label, title, st, extra='') => `<button type="button" class="nb-btn" data-nbcmd="${cmd}" ${st?`data-state="${st}"`:''} title="${title}" aria-label="${title}" ${extra}>${label}</button>`;
+  const sizes = [12,14,16,18,20,24,28,32,40,48];
+  main.innerHTML = `
+    <div class="page-header">
+      <div><h1 class="page-title">Notebook</h1><p class="page-subtitle">One endless page — write, format, and drop in screenshots. Saves automatically.</p></div>
+    </div>
+    <div class="nb-toolbar" id="nbToolbar">
+      <div class="nb-group">
+        <select class="nb-sel" id="nbBlock" title="Text style"><option value="p">Normal</option><option value="h1">Heading 1</option><option value="h2">Heading 2</option><option value="h3">Heading 3</option></select>
+        <select class="nb-sel" id="nbSize" title="Size"><option value="">Size</option>${sizes.map(n=>`<option value="${n}">${n}</option>`).join('')}</select>
+      </div>
+      <div class="nb-group">
+        ${B('bold','<b>B</b>','Bold','bold')}
+        ${B('italic','<i>I</i>','Italic','italic')}
+        ${B('underline','<u>U</u>','Underline','underline')}
+        ${B('strikeThrough','<s>S</s>','Strikethrough','strikeThrough')}
+      </div>
+      <div class="nb-group">
+        <label class="nb-btn nb-color" title="Text color"><span class="nb-color-glyph">A<span class="nb-swatch" id="nbFgSw" style="background:#7c3aed"></span></span><input type="color" id="nbFg" value="#7c3aed"></label>
+        <label class="nb-btn nb-color" title="Highlight color"><span class="nb-color-glyph">▮<span class="nb-swatch" id="nbBgSw" style="background:#facc15"></span></span><input type="color" id="nbBg" value="#facc15"></label>
+      </div>
+      <div class="nb-group">
+        ${B('justifyLeft','<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><path d="M4 6h16M4 12h10M4 18h14"/></svg>','Align left','justifyLeft')}
+        ${B('justifyCenter','<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><path d="M4 6h16M7 12h10M5 18h14"/></svg>','Align center','justifyCenter')}
+        ${B('justifyRight','<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><path d="M4 6h16M10 12h10M6 18h14"/></svg>','Align right','justifyRight')}
+      </div>
+      <div class="nb-group">
+        ${B('insertUnorderedList','•','Bullet list','insertUnorderedList')}
+        ${B('insertOrderedList','1.','Numbered list','insertOrderedList')}
+      </div>
+      <div class="nb-group">
+        <label class="nb-btn" title="Insert image" style="cursor:pointer;">${ICONS.image}<input type="file" id="nbImgInput" accept="image/*" multiple style="display:none;"></label>
+        ${B('removeFormat','Clear','Clear formatting','')}
+        ${B('undo','↶','Undo','')}
+        ${B('redo','↷','Redo','')}
+      </div>
+    </div>
+    <div class="card nb-doc" id="nbDoc" contenteditable="true" spellcheck="true" data-placeholder="Start writing… paste or insert screenshots anywhere."></div>
+  `;
+  const ed = document.getElementById('nbDoc');
+  ed.innerHTML = nb.html;
+  ed.addEventListener('input', nbOnInput);
+  ed.addEventListener('blur', nbFlush);
+  ed.addEventListener('keyup', updateNbToolbar);
+  ed.addEventListener('click', (e)=>{
+    if(e.target.tagName==='IMG'){ const r = document.createRange(); r.selectNode(e.target); const s = window.getSelection(); s.removeAllRanges(); s.addRange(r); }
+  });
+  ed.addEventListener('dblclick', (e)=>{ if(e.target.tagName==='IMG') openImageLightbox(e.target.src); });
+  ed.addEventListener('paste', (e)=>{
+    const cd = e.clipboardData; if(!cd) return;
+    const files = [...(cd.files||[])].filter(f=>/^image\//.test(f.type));
+    e.preventDefault();
+    if(files.length){ nbInsertImages(files); return; }
+    const text = cd.getData('text/plain');
+    if(text) document.execCommand('insertText', false, text);
+  });
+  ed.addEventListener('drop', (e)=>{
+    const files = e.dataTransfer && [...e.dataTransfer.files].filter(f=>/^image\//.test(f.type));
+    if(files && files.length){ e.preventDefault(); nbInsertImages(files); }
+  });
+  const tb = document.getElementById('nbToolbar');
+  /* keep the text selection while clicking toolbar buttons */
+  tb.addEventListener('mousedown', (e)=>{ if(e.target.closest('.nb-btn') && !e.target.closest('input')) e.preventDefault(); });
+  tb.querySelectorAll('[data-nbcmd]').forEach(b=> b.onclick = ()=>{ nbExec(b.dataset.nbcmd); SFX.toggle && SFX.toggle(); });
+  document.getElementById('nbBlock').onchange = (e)=>{ nbExec('formatBlock', '<'+e.target.value+'>'); };
+  document.getElementById('nbSize').onchange = (e)=>{ const v = parseInt(e.target.value,10); if(v) nbSetSize(v); e.target.value = ''; };
+  const fg = document.getElementById('nbFg'), bg = document.getElementById('nbBg');
+  fg.oninput = ()=>{ document.getElementById('nbFgSw').style.background = fg.value; };
+  bg.oninput = ()=>{ document.getElementById('nbBgSw').style.background = bg.value; };
+  fg.onchange = ()=>{ nbExec('foreColor', fg.value); };
+  bg.onchange = ()=>{ nbExec('hiliteColor', bg.value); };
+  document.getElementById('nbImgInput').onchange = (e)=>{ nbInsertImages(e.target.files); e.target.value = ''; };
+}
+
 /* ============================= REMEMBER (key reminders) ============================= */
 /* The things the trader must not forget. Any number of entries, shown on the Dashboard.
    Stored in its own kv_store row ('reminders') — never touches trades, settings or the rulebook. */
@@ -3244,7 +3675,7 @@ function openTradeModal(id){
   const t = existing || {
     date: new Date().toISOString().slice(0,10), time:'', symbol:'NQ', rating:'A', po3:PO3_WINDOWS[0], po3Used:'yes',
     model:MODELS[0], direction:'long', entryTf:'1m', outcome:'win', rr:2,
-    dol: DOL_OPTIONS[0], psych:'', notes:'',
+    dol: DOL_OPTIONS[0], notes:'',
     journalType: state.journal, demo:'no', riskPerTrade: state.settings.defaultRiskPerTrade,
     imgLow:null, imgMid:null, imgHigh:null,
   };
@@ -3292,7 +3723,6 @@ function openTradeModal(id){
           <span class="tz-hint">If you closed at a small profit or loss instead of exactly breakeven, enter the amount here. Negative for a small loss.</span>
         </div>
         <div class="form-field"><label>Draw on liquidity</label><select id="fDol">${DOL_OPTIONS.map(o=>`<option value="${o}" ${t.dol===o?'selected':''}>${o}</option>`).join('')}</select></div>
-        <div class="form-field"><label>Psychology / mental state</label><input type="text" id="fPsych" placeholder="e.g. calm, FOMO, revenge trade" value="${escapeHtml(t.psych||'')}"></div>
         <div class="form-field span2"><label>Notes</label><textarea id="fNotes" rows="3" placeholder="Describe the setup, execution, what went right or wrong…">${escapeHtml(t.notes||'')}</textarea></div>
         <div class="form-field span2"><label>Chart screenshots</label><div class="img-upload-row">${TF_SLOTS.map(s=>imgSlotHtml(s.key, s.label, imgState[s.key])).join('')}</div></div>
         <div class="form-preview" id="livePreview"></div>
@@ -3399,7 +3829,6 @@ function openTradeModal(id){
       outcome: outcomeVal,
       beAdjustment: (outcomeVal==='be_win' || outcomeVal==='be_loss') ? (parseFloat(document.getElementById('fBeAdj').value)||0) : 0,
       dol: document.getElementById('fDol').value,
-      psych: document.getElementById('fPsych').value.trim(),
       notes: document.getElementById('fNotes').value.trim(),
       imgLow: imgState.imgLow, imgMid: imgState.imgMid, imgHigh: imgState.imgHigh,
     };
@@ -3463,7 +3892,6 @@ function openTradeDetail(id){
         ${detailItem('Draw on liquidity', escapeHtml(t.dol||'—'))}
         ${detailItem('Day of week', DOW[t.dow])}
       </div>
-      <div class="detail-block"><div class="detail-block-lbl">Psychology / mental state</div><div class="detail-block-text">${escapeHtml(t.psych||'—')}</div></div>
       <div class="detail-block"><div class="detail-block-lbl">Notes</div><div class="detail-block-text">${escapeHtml(t.notes||'—')}</div></div>
       <div class="detail-block"><div class="detail-block-lbl">Chart screenshots</div><div class="detail-imgs">${TF_SLOTS.map(s=>detailImgCard(s.label, t[s.key], s.key)).join('')}</div></div>
       <div class="modal-foot">
