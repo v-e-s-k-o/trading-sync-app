@@ -1359,6 +1359,19 @@
   .rail-h.rail-h2{font-size:13px;font-weight:600;padding-left:20px;}
   .rail-h.rail-h3{font-size:12.5px;font-weight:500;padding-left:32px;color:var(--text-2);}
   .rail .journal-sum{padding:18px 18px 12px;}
+
+  /* PO3 opens — multi-select chips */
+  .po3-hint{font-weight:500;color:var(--text-3);margin-left:6px;}
+  .po3-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;}
+  .po3-chip{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;height:48px;border:0;border-radius:var(--btn-r);cursor:pointer;
+    background:var(--grad-ghost);box-shadow:inset 0 0 0 1px var(--ghost-edge);color:var(--text);font:inherit;font-size:14px;font-weight:700;letter-spacing:-.02em;
+    transition:transform .2s var(--spring), box-shadow .2s, color .2s;}
+  .po3-chip small{font-size:10px;font-weight:600;color:var(--text-3);letter-spacing:.02em;}
+  .po3-chip:hover{transform:translateY(-1px);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--accent) 45%,var(--ghost-edge));}
+  .po3-chip:active{transform:scale(.94);}
+  .po3-chip.on{background:var(--grad-accent);color:#fff;box-shadow:inset 0 1px 0 rgba(255,255,255,.3), 0 6px 14px -6px color-mix(in srgb,var(--accent) 70%,transparent);animation:popIn .3s var(--spring);}
+  .po3-chip.on small{color:rgba(255,255,255,.8);}
+  @media (max-width: 480px){ .po3-grid{grid-template-columns:repeat(4,minmax(0,1fr));} }
 </style>
 </head>
 <body>
@@ -1383,7 +1396,17 @@ const SYMBOLS = {
   'MES' : {name:'Micro S&P (MES)'},
 };
 const RATINGS = ['A+','A','B','C','F'];
-const PO3_WINDOWS = ['9:30+9:45','10:00','10:00+10:15','10:00+10:30','10:30','10:30+10:45'];
+/* PO3: pick every open that actually formed it (any combination). Stored as po3Opens (array) + po3 (label). */
+const PO3_OPENS = ['00:00','08:00','08:30','09:00','09:30','09:45','10:00','10:15','10:30','10:45'];
+const PO3_WINDOWS = PO3_OPENS;   /* kept for older references */
+function po3List(t){
+  if(t.po3Used==='no' || t.po3==='Not used') return ['Not used'];
+  if(Array.isArray(t.po3Opens) && t.po3Opens.length) return PO3_OPENS.filter(o=> t.po3Opens.includes(o)).concat(t.po3Opens.filter(o=> !PO3_OPENS.includes(o)));
+  /* older trades stored one combined string such as "9:30+9:45" */
+  const parts = String(t.po3||'').split('+').map(x=> x.trim()).filter(Boolean).map(x=> /^\d:\d\d$/.test(x) ? '0'+x : x);
+  return parts.length ? parts : ['Not used'];
+}
+function po3Label(t){ const l = po3List(t); return l[0]==='Not used' ? 'Not used' : l.join(' + '); }
 const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 const MODELS = ['BNQ','PDI','Mechanical','Continuation','Pattie Swing'];
 const TIMEFRAMES = ['15s','30s','1m','2m','3m','4m','5m'];
@@ -3018,7 +3041,7 @@ function outcomeBreakdownCounts(trades){
 function withDerived(t){
   const journalType = t.journalType==='backtest' ? 'backtest' : 'live';
   const demo = t.demo==='yes' ? 'yes' : 'no';
-  return Object.assign({}, t, { journalType, demo, r: rMultiple(t), dow: dayOfWeek(t.date), outClass: outcomeClass(t) });
+  return Object.assign({}, t, { journalType, demo, r: rMultiple(t), dow: dayOfWeek(t.date), outClass: outcomeClass(t), po3: po3Label(t), po3List: po3List(t) });
 }
 function journalTrades(){ return state.trades.filter(t => (t.journalType==='backtest' ? 'backtest' : 'live') === state.journal); }
 const CATEGORY_LABELS = { real:'Real trading', demo:'Demo trading', backtest:'Backtesting' };
@@ -3067,7 +3090,7 @@ function computeStats(trades){
   }
   return { total:trades.length, n, wins:wins.length, losses:losses.length, be, winRate, totalR, avgR, avgWinR, curStreak, curType, bestWinStreak, worstLossStreak };
 }
-function groupBy(trades, keyFn){ const map = {}; trades.forEach(t=>{ const k = keyFn(t); if(!map[k]) map[k]=[]; map[k].push(t); }); return map; }
+function groupBy(trades, keyFn){ const map = {}; trades.forEach(t=>{ const k = keyFn(t); (Array.isArray(k) ? k : [k]).forEach(key=>{ if(!map[key]) map[key]=[]; map[key].push(t); }); }); return map; }
 /* Wilson score interval (95%) for a win rate. The lower bound only gets high when a setup has BOTH
    a good win rate AND enough trades behind it — 1 win out of 1 scores 0.21, 14 out of 20 scores 0.48. */
 function wilson(w, n){
@@ -3824,7 +3847,7 @@ const DIMENSIONS = {
   dow:     { label:'Day of week', get:(t)=>DOW_SHORT[t.dow], order: DOW_SHORT },
   rating:  { label:'Rating', get:(t)=>t.rating, order: RATINGS },
   model:   { label:'Model', get:(t)=>t.model, order: MODELS },
-  po3:     { label:'PO3 window', get:(t)=>t.po3, order: [...PO3_WINDOWS, 'Not used'] },
+  po3:     { label:'PO3 open', get:(t)=>t.po3List, order: [...PO3_OPENS, 'Not used'] },
   entryTf: { label:'Entry timeframe', get:(t)=>t.entryTf, order: TIMEFRAMES },
   direction:{ label:'Direction', get:(t)=>t.direction==='long'?'Long':'Short', order:['Long','Short'] },
   symbol:  { label:'Pair', get:(t)=>t.symbol, order: Object.keys(SYMBOLS) },
@@ -5255,7 +5278,7 @@ function openTradeModal(id){
   state.editingId = id || null;
   const existing = id ? state.trades.find(t=>t.id===id) : null;
   const t = existing || {
-    date: new Date().toISOString().slice(0,10), time:'', symbol:'NQ', rating:'A', po3:PO3_WINDOWS[0], po3Used:'yes',
+    date: new Date().toISOString().slice(0,10), time:'', symbol:'NQ', rating:'A', po3:'', po3Opens:[], po3Used:'yes',
     model:MODELS[0], direction:'long', entryTf:'1m', outcome:'win', rr:2,
     dol: DOL_OPTIONS[0], notes:'',
     journalType: state.journal, demo:'no',
@@ -5291,7 +5314,8 @@ function openTradeModal(id){
         <div class="form-field"><label>PO3 used?</label>
           <div class="toggle-row"><button type="button" class="toggle-btn ${(t.po3Used||'yes')==='yes'?'active':''}" data-po3used="yes" data-silent>Yes</button><button type="button" class="toggle-btn ${t.po3Used==='no'?'active':''}" data-po3used="no" data-silent>No</button></div>
         </div>
-        <div class="form-field" id="po3FieldWrap" style="${t.po3Used==='no'?'display:none;':''}"><label>PO3 window</label><select id="fPo3">${PO3_WINDOWS.map(p=>`<option value="${p}" ${t.po3===p?'selected':''}>${p}</option>`).join('')}</select></div>
+        <div class="form-field span2" id="po3FieldWrap" style="${t.po3Used==='no'?'display:none;':''}"><label>PO3 opens <span class="po3-hint">pick every open that formed it</span></label>
+          <div class="po3-grid" id="fPo3">${(()=>{ const sel = existing ? po3List(t) : []; return PO3_OPENS.map(o=>`<button type="button" class="po3-chip ${sel.includes(o)?'on':''}" data-po3="${o}" aria-pressed="${sel.includes(o)}" data-silent>${o}<small>open</small></button>`).join(''); })()}</div></div>
         <div class="form-field"><label>Model</label><select id="fModelM">${MODELS.map(m=>`<option value="${m}" ${t.model===m?'selected':''}>${m}</option>`).join('')}</select></div>
         <div class="form-field"><label>Entry timeframe</label><select id="fEntryTf">${TIMEFRAMES.map(tf=>`<option value="${tf}" ${t.entryTf===tf?'selected':''}>${tf}</option>`).join('')}</select></div>
         <div class="form-field"><label>Risk : Reward (X : 1)</label>
@@ -5330,6 +5354,7 @@ function openTradeModal(id){
   bindToggle('jtype', v=>jTypeVal=v, ()=>{ document.getElementById('demoFieldWrap').style.display = jTypeVal==='backtest' ? 'none' : ''; });
   bindToggle('demo', v=>demoVal=v);
   bindToggle('po3used', v=>po3UsedVal=v, ()=>{ document.getElementById('po3FieldWrap').style.display = po3UsedVal==='no' ? 'none' : ''; });
+  overlay.querySelectorAll('[data-po3]').forEach(b=>{ b.onclick = ()=>{ formDirty = true; const on = !b.classList.contains('on'); b.classList.toggle('on', on); b.setAttribute('aria-pressed', String(on)); SFX[on ? 'toggle' : 'tick'](); haptic('select'); }; });
 
   function bindImgSlot(key, label){
     overlay.querySelectorAll(`[data-imginput="${key}"]`).forEach(input=>{
@@ -5379,6 +5404,7 @@ function openTradeModal(id){
   document.getElementById('modalSave').onclick = async ()=>{
     const dateVal = document.getElementById('fDate').value;
     if(!dateVal){ SFX.error(); haptic('error'); const f0 = document.getElementById('fDate'), f = f0._csBtn || f0; f.classList.add('shake'); f.focus(); setTimeout(()=>f.classList.remove('shake'),500); toast('Please select a date', 'err'); return; }
+    if(po3UsedVal!=='no' && !overlay.querySelector('[data-po3].on')){ SFX.error(); haptic('error'); const g = document.getElementById('fPo3'); g.classList.add('shake'); g.scrollIntoView({block:'center', behavior:'smooth'}); setTimeout(()=>g.classList.remove('shake'),500); toast('Pick at least one PO3 open (or set “PO3 used?” to No)', 'err'); return; }
     let rrVal = parseFloat(document.getElementById('fRR').value); if(!rrVal || rrVal < 0.01) rrVal = 0.01;
     const outcomeVal = document.getElementById('fOutcomeM').value;
     /* Start from the stored trade so fields that are no longer shown (old risk / breakeven-$ values) are kept untouched. */
@@ -5393,7 +5419,8 @@ function openTradeModal(id){
       rating: document.getElementById('fRating').value,
       direction: dirVal,
       po3Used: po3UsedVal,
-      po3: po3UsedVal==='no' ? 'Not used' : document.getElementById('fPo3').value,
+      po3Opens: po3UsedVal==='no' ? [] : [...overlay.querySelectorAll('[data-po3].on')].map(b=> b.dataset.po3),
+      po3: po3UsedVal==='no' ? 'Not used' : [...overlay.querySelectorAll('[data-po3].on')].map(b=> b.dataset.po3).join(' + '),
       model: document.getElementById('fModelM').value,
       entryTf: document.getElementById('fEntryTf').value,
       rr: rrVal,
